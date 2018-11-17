@@ -85,7 +85,6 @@ class WavFile(object):
             index1 = self.fourierBinSize * i
             index2 = self.fourierBinSize * (i + 1)
             result.append(self.getFrequencySpectrum(wavData[index1:index2]))
-
         return result
 
     def displayAudioSpectrum(self):
@@ -101,11 +100,9 @@ class WavFile(object):
             plt.plot(t,s)
             plt.pause(0.0000000000004)
         #s = numpy.array(s)
-
-
         plt.show()
 
-testFile = WavFile('notestest2.wav')
+testFile = WavFile('gcslevel1.wav')
 #testFile.displayAudioSpectrum()
 print(len(testFile.data))
 testFile.displayAudioSpectrum()
