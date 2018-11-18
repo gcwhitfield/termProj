@@ -21,3 +21,11 @@ class Enemy:
 
     def drawEnemy(self, screen):
         pass
+
+class BoxEnemy(Enemy):
+    def __init__(self, metaData, size=None, speed=None):
+        super().__init__(metaData, size=size, speed=speed)
+
+class NoodleEnemy(Enemy):
+    def __init__(self, metaData, size=None, speed=None):
+        super().__init__(metaData, size=size, speed=speed)

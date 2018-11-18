@@ -2,12 +2,14 @@
 # 15-112 Term Project 2018
 
 import sys
-
-
-
-class MenuData:
-    def __init__(self, metaData):
+from button import MainMenuButton
+from colors import Colors
+import pygame
+# contains the data for the main Menu
+class MainMenu:
+    def __init__(self, metaData, screen):
         self.metaData = metaData
+        self.screen = screen
         self.currScreen = 'mainMenu'
         self.screens = (
             'mainMenu',
@@ -15,30 +17,109 @@ class MenuData:
             'fileSelect',
             'play'
         )
-        self.backgroundColor = (68, 1, 96) # rgb values
+        self.backgroundColor = (0, 0, 0) # rgb values
+
+        self.mainMenuButtonSpacing = 100
+        self.mainMenuButtons = set([
+            MainMenuButton(self.metaData.width//2, self.metaData.height//2, # position
+            100, 50, # size
+            'PLAY', # text
+            self.backgroundColor, # background color
+            'play', # click destination
+            self, # MainMenu
+            txtColor = Colors().WHITE), # text color
+
+            MainMenuButton(self.metaData.width//2,
+            self.metaData.height//2 + self.mainMenuButtonSpacing,
+            100, 50,
+            'OPTIONS',
+            self.backgroundColor,
+            'options',
+            self,
+            txtColor = Colors().WHITE),
+
+            MainMenuButton(self.metaData.width//2,
+            self.metaData.height//2 + 2*self.mainMenuButtonSpacing,
+            100, 50,
+            'QUIT',
+            self.backgroundColor,
+            'quit',
+            self,
+            txtColor = Colors().WHITE) # exit the game if button clicked
+        ]),
+        self.optionsButtons = set([
+            MainMenuButton(100, 100,
+            100, 50,
+            'BACK',
+            self.backgroundColor,
+            'mainMenu',
+            self,
+            txtColor = Colors().WHITE),
+        ]),
+        self.playButtons = set([
+            MainMenuButton(100, 100,
+            100, 50,
+            'BACK',
+            self.backgroundColor,
+            'mainMenu',
+            self,
+            txtColor = Colors().WHITE),
+        ]),
         
+    def drawBackGround(self, screen):
+        screen.fill(self.backgroundColor)
 
-def drawBackGround(screen, data):
-    screen.fill(data.backgroundColor)
+    def drawMainMenu(self, screen):
+        for tup in self.mainMenuButtons:
+            for button in tup:
+                button.draw(screen)
 
-def drawMainMenu(screen, data):
-    pass
+    def drawOptionsScreen(self, screen):
+        for tup in self.optionsButtons:
+            print(tup)
+            for button in tup:
+                button.draw(screen)
+            
+    def drawFileSelect(self, screen):
+        pass
 
-def drawOptionsScreen(screen, data):
-    pass
+    def drawPlayScreen(self, screen):
+        for tup in self.playButtons:
+            print(tup)
+            for button in tup:
+                button.draw(screen)
 
-def drawFileSelect(screen, data):
-    pass
+    def draw(self, screen):
+        self.drawBackGround(screen)
+        if self.currScreen == 'mainMenu':
+            self.drawMainMenu(screen)
+        elif self.currScreen == 'options':
+            self.drawOptionsScreen(screen)
+        elif self.currScreen == 'fileSelect':
+            self.drawFileSelect(screen)
+        elif self.currScreen == 'play':
+            self.drawPlayScreen(screen)
 
-def drawPlayScreen():
-    pass
+    def changeScreen(self, targetScreen):
+        if targetScreen in self.screens:
+            self.currScreen = targetScreen
 
-def draw(screen, data):
-    if data.currScreen == 'mainMenu':
-        drawMainMenu(screen, data)
-    elif data.currScreen == 'options':
-        drawOptionsScreen(screen, data)
-    elif data.currScreen == 'fileSelect':
-        drawFileSelect(screen, data)
-    elif data.currScreen == 'play':
-        drawPlayScreen(screen, data)
+    def getButtons(self):
+        if self.currScreen == 'mainMenu':
+            return self.mainMenuButtons
+        elif self.currScreen == 'options':
+            return self.optionsButtons
+        elif self.currScreen == 'play':
+            return self.playButtons
+
+    def mouseClicked(self, mousePos): # check if clicked on button
+        for tup in self.getButtons():
+            for button in tup:
+                if button.isClicked(mousePos):
+                    button.onClick()
+
+    def run(self, screen):
+        self.draw(screen)
+        if pygame.mouse.get_pressed()[0]: # get left click
+            mousePos = pygame.mouse.get_pos()
+            self.mouseClicked(mousePos)

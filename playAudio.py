@@ -1,35 +1,68 @@
 #!usr/bin/env python  
 #coding=utf-8  
 
-# I did not create (most of)this code myself. I'm using the module PyAudio to 
+# I did not create (most of) this code myself. I'm using the module PyAudio to 
 # play music for the game, and I copied this code from a stack overflow
 # link that contains the bare minimum needed to play audio using PyAudio.
 #https://stackoverflow.com/questions/6951046/pyaudio-help-play-a-file
 
 #import portaudio
 import pyaudio  
-import wave  
+import wave 
+from wavInterpretation import WavFile
 
-#define stream chunk   
-chunk = 44100
-
-#open a wav format music  
-f = wave.open(r"gcslevel1.wav","rb")  
 #instantiate PyAudio  
 p = pyaudio.PyAudio()  
-#open stream  
-stream = p.open(format = p.get_format_from_width(f.getsampwidth()),  
-                channels = f.getnchannels(),  
-                rate = f.getframerate(),  
-                output = True)  
-#read data  
-data = f.readframes(chunk)  
 
+print('1')
+#open a wav format music  
+song = gameData.songObject
+
+songWaveFile = wave.open(gameData.song)
+print('2')
+class FrameData:
+    def __init__(self, currLoudness, frequencies):
+        self.currLoudness = currLoudness
+        self.frequencies = frequencies
+        self.averageLoudness = song.averageLoudness
+#open stream  
+stream = p.open(format = p.get_format_from_width(song.waveObject.getsampwidth()),  
+                channels = song.waveObject.getnchannels(),  
+                rate = song.waveObject.getframerate(),  
+                output = True)  
+#define stream chunk   
+print('3')
+
+
+#read data  
+data = songWaveFile.readframes(chunk)
+
+def stream(chunksize, gameData):
+    chunk = gameData.chunk
+    gameData.gameTime += 1
+    print('b')
+        
+    # data = songWaveFile.readframes(chunk) 
+    frameData = FrameData(
+        song.loudnessPerChunk[gameData.gameTime],
+        (0, 0, 0)
+    )
+    stream.write(data) 
+    gameData.timerFired(frameData)
+
+'''
 #play stream  
 while data:
+    gameData.gameTime += 1
     print('b')
     stream.write(data)  
-    data = f.readframes(chunk)  
+    data = songWaveFile.readframes(chunk) 
+    frameData = FrameData(
+        song.loudnessPerChunk[gameData.gameTime],
+        (0, 0, 0)
+    ) 
+    gameData.timerFired(frameData)
+'''
 
 print('a')
 #stop stream  
