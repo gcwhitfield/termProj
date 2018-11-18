@@ -114,7 +114,7 @@ class WavFile(object):
     def displayAudioSpectrum(self):
         t = numpy.array(range(self.calculationsPerFreqBand * len(self.frequencyBands)))
         plt.show()
-        spectrums = self.freqSpectrums(self.data)
+        spectrums = self.freqSpectrums()
         print('calc complete')
         for spectrum in spectrums:
             s = numpy.array(spectrum)
@@ -170,11 +170,11 @@ testFile = WavFile('notesTest3.wav', 2205)
 #print(testFile.lenInSamples)
 
 #print(testFile.chunkSize)
+testFile.displayAudioSpectrum()
 #testFile.displayAudioSpectrum()
-#testFile.displayAudioSpectrum()
 
-
-
+#print(testFile.lenInSamples)
+#print(len(testFile.loudnessPerChunk))
 
 
 

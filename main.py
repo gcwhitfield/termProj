@@ -32,7 +32,7 @@ class MetaData:
         )
         self.brightness = 50 # out of a max of 100
         self.mainMenu = mainMenu.MainMenu(self, self.screen)
-        self.gameData = game.GameData(self, self.screen, 'notesTest3.wav')
+        self.gameData = game.GameData(self, self.screen, 'notestest2.wav')
 
 def drawMainMenu(screen, data):
     data.mainMenu.run(screen)
