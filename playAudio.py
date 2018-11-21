@@ -39,15 +39,14 @@ data = songWaveFile.readframes(chunk)
 
 def stream(chunksize, gameData):
     chunk = gameData.chunk
-    gameData.gameTime += 1
     print('b')
-        
     # data = songWaveFile.readframes(chunk) 
     frameData = FrameData(
         song.loudnessPerChunk[gameData.gameTime],
         (0, 0, 0)
     )
     stream.write(data) 
+    print(len(data))
     gameData.timerFired(frameData)
 
 '''

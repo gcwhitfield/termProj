@@ -76,7 +76,6 @@ class MainMenu:
 
     def drawOptionsScreen(self, screen):
         for tup in self.optionsButtons:
-            print(tup)
             for button in tup:
                 button.draw(screen)
             
@@ -85,7 +84,6 @@ class MainMenu:
 
     def drawPlayScreen(self, screen):
         for tup in self.playButtons:
-            print(tup)
             for button in tup:
                 button.draw(screen)
 

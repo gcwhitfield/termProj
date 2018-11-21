@@ -124,21 +124,21 @@ class WavFile(object):
             plt.pause(0.0000000000004)
         plt.show()
     
-    # calculate the average loudness per chunk of audio
+    # use the room mean square (RMS) to calculate the loudness of a chunk of audio
     def getLoudnessPerChunk(self):
         result = []
-        for chunk in range(self.lenInSamples//self.chunkSize):
-            offset = self.chunkSize * chunk
+        for chunk in range((self.lenInSamples)//(self.chunkSize//2)):
+            offset = int((self.chunkSize) * chunk) # manipulate this value to change how the data lines up with the music
             chunkAverageLoudness = 0
             for dataPoint in range(self.chunkSize):
-                chunkAverageLoudness += abs(self.data[offset + dataPoint])
-            chunkAverageLoudness = chunkAverageLoudness / self.chunkSize
+                chunkAverageLoudness += self.data[offset + dataPoint] ** 2 # add squares
+            chunkAverageLoudness = chunkAverageLoudness / self.chunkSize # divide
+            chunkAverageLoudness = chunkAverageLoudness ** 0.5 # square root
             result.append(chunkAverageLoudness)
         return result
 
     # take the frequency data and save it as a text file
     def writeFrequencyDataToFile(self, freqData):
-        print('write to file')
         result = ''
         #print(freqData)
         for spectrum in freqData:
@@ -152,7 +152,6 @@ class WavFile(object):
 
     # read the frequency text file
     def readFrequencyDataFile(self, dataList): # MUTABLE function
-        print('readFile')
         songDataFilename = self.fileName + '.txt'
         with open('songData/' + songDataFilename, 'r') as f:
             freqData = f.read()
@@ -163,14 +162,18 @@ class WavFile(object):
                     if dataPoint != '':
                         specData.append(int(dataPoint))
                 dataList.append(specData)
+        
+    def frameData(self, chunkSize, chunk ):
+        data = self.rawFileData
+        return data[chunkSize * chunk : chunkSize * (chunk + 1)]
 
 
-testFile = WavFile('notesTest3.wav', 2205)
+#testFile = WavFile('notesTest3.wav', 2205)
 
 #print(testFile.lenInSamples)
 
 #print(testFile.chunkSize)
-testFile.displayAudioSpectrum()
+#testFile.displayAudioSpectrum()
 #testFile.displayAudioSpectrum()
 
 #print(testFile.lenInSamples)

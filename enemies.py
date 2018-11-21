@@ -12,19 +12,33 @@ class Enemy:
             self.size = size
 
         if speed == None:
-            self.speed = random.randint(0, 20) # random speed if none
+            self.speed = random.randint(1, 2) # random speed if none
         else:
             self.speed = speed
         self.metaData = metaData
-        self.posx = random.randint(metaData.width)
-        self.posy = random.randint(metaData.height)
+        self.posx = random.randint(10, metaData.width)
+        self.posy = random.randint(10, metaData.height)
 
-    def drawEnemy(self, screen):
-        pass
 
 class BoxEnemy(Enemy):
     def __init__(self, metaData, size=None, speed=None):
         super().__init__(metaData, size=size, speed=speed)
+        self.rect = pygame.Rect(self.posx, self.posy, self.size, self.size)
+
+    def draw(self):
+        pygame.draw.rect(self.metaData.screen, (100, 100, 100), self.rect, 0)
+
+    def move(self): # move normally
+        self.posx += self.speed * 0.5
+        self.rect = pygame.Rect(self.posx, self.posy, self.size, self.size)
+    
+    def beatMove(self): # move extra on the beat
+        self.posx += self.speed
+        self.rect = pygame.Rect(self.posx, self.posy, self.size, self.size)
+
+    def isCollidingWithWall(self):
+        if self.posx < 0 or self.posx + self.size > self.metaData.width:
+            self.speed = -self.speed
 
 class NoodleEnemy(Enemy):
     def __init__(self, metaData, size=None, speed=None):
