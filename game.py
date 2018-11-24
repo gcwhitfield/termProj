@@ -19,13 +19,12 @@ class SongData:
     def __init__(self, metaData):
         self.metaData = metaData
         self.chunkTimer = 0
-        self.chunkSize = 735 # 1/60 of a second of data
-        self.chunkCount = -1
+        self.chunkCount = 0
 
 class GameData:
     def __init__(self, metaData, screen, song):
         self.chunkSize = 1460 # 1/20 of a second
-        self.gameTime = 0
+        self.gameTime = -1
         self.metaData = metaData
         self.screen = screen
         self.song = song
@@ -38,7 +37,7 @@ class GameData:
         self.enemies = set() 
         self.enemies.add(BoxEnemy(self.metaData))
 
-        self.backgroundColor = (50, 0, 0)
+        self.backgroundColor = (0, 0, 0)
         
         # initialize the music
         self.musicThread = threading.Thread(target = threadPlayAudio.run, args = (self,))
@@ -48,24 +47,41 @@ class GameData:
         self.songLoudnessData = self.songObject.loudnessPerChunk
         self.maxLoudness = self.songObject.maxLoudness
         self.averageLoudness = self.songObject.averageLoudness
+        self.songObject.configureSpectrumData()
+        self.musicSpectrums = self.songObject.frequencySpectrumData
     
     def drawBackground(self, screen):
         screen.fill(self.backgroundColor)
 
+    def displayAudioSpectrumBackground(self, screen):
+        rectBorder = 5
+        currSpectrum = self.musicSpectrums[self.gameTime]
+        gameWidth = self.metaData.width
+        gameHeight = self.metaData.height
+        rectWidth = gameWidth / len(currSpectrum)
+        posy = 0
+        
+        for index in range(len(currSpectrum)):
+            dataPoint = currSpectrum[index]
+            height = dataPoint//100
+            rect = pygame.Rect
+            posx = index * rectWidth
+            rect = pygame.Rect(posx, posy, rectWidth - rectBorder, height)
+            pygame.draw.rect(screen, (100, 0, 100), rect, 0)
+
+
     def drawGameScreen(self, screen):
         self.drawBackground(screen)
-
-        # draw a box for testing
-        rectWidth = 10 + (200 * (self.songLoudnessData[self.gameTime] / (self.averageLoudness * 1.75)))
-        rect = pygame.Rect(self.metaData.width//2, self.metaData.height//2, rectWidth, 50)
-        pygame.draw.rect(screen, (100, 100, 100), rect, 0)
+        self.displayAudioSpectrumBackground(screen)
 
         self.drawEnemies(screen)
 
     def drawEnemies(self, screen):
         for enemy in self.enemies:
             enemy.draw()
-    
+
+
+   
     # execute the audio at the start of the level
     def playAudio(self):
         if self.audioStarted == False:
@@ -87,7 +103,7 @@ class GameData:
         for enemy in self.enemies:
             enemy.beatMove()
 
-
+    
 
     # RUNS EVERY 1/60 OF A SECOND
     def timerFired(self, frameData): # playAudio will call timerFired

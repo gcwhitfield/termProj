@@ -9,6 +9,7 @@ from matplotlib import pyplot as plt
 import numpy
 import math
 import struct
+import os
 
 import string
 
@@ -41,6 +42,8 @@ class WavFile(object):
         return name
 
     def __init__(self, filePath, chunkSize):
+        self.frequencySpectrumData = [] # will get configured when we call the configureSpectrumData() function
+
         self.filePath = filePath
         self.fileName = self.getName(self.filePath)
         self.waveObject = wave.open(filePath, 'rb')
@@ -74,7 +77,7 @@ class WavFile(object):
         self.averageLoudness = self.getAverageLoudness(self.data)
         self.loudnessPerChunk = self.getLoudnessPerChunk()
         self.maxLoudness = max(self.loudnessPerChunk)
-
+        self.songDataFilename = self.fileName + '.txt'
 
     # evaluate the fourier transform for a given frequency  ````
     def fourierEvaluate(self, wavData, frequency):
@@ -82,7 +85,7 @@ class WavFile(object):
         for j in range(0, self.chunkSize, 2):
             dataPoint = wavData[j]
             i = complex(0, 1)
-            k = (frequency/self.sampleRate) * 100
+            k = (frequency/self.sampleRate) * 500
             exponential = cmath.exp((i*-1*cmath.pi*k*j)/((self.chunkSize)))
             result += dataPoint * exponential
         return abs(result)//50
@@ -108,6 +111,7 @@ class WavFile(object):
             index1 = self.chunkSize * i
             index2 = self.chunkSize * (i + 1)
             result.append(self.getFrequencySpectrum(self.data[index1:index2]))
+            print('Spectrum ' + str(i) + ' analyzed!')
         return result
 
     # display the audio spectrum using matplotlib and numpy
@@ -145,15 +149,15 @@ class WavFile(object):
             for dataPoint in spectrum:
                 result += str(int(dataPoint)) + '/'
             result += '\n'
-        songDataFilename = self.fileName + '.txt'
         # the writing to file code copied from the 15-112 website
-        with open('songData/' + songDataFilename, "wt") as f:
+        with open('songData/' + self.songDataFilename, "wt") as f:
             f.write(result)
 
     # read the frequency text file
-    def readFrequencyDataFile(self, dataList): # MUTABLE function
-        songDataFilename = self.fileName + '.txt'
-        with open('songData/' + songDataFilename, 'r') as f:
+    def readFrequencyDataFile(self): # MUTABLE function
+        print('aksdhaksjhaksjhdkasjdhkjh')
+        result = []
+        with open('songData/' + self.songDataFilename, 'r') as f:
             freqData = f.read()
             # append the spectrum data into the dataList
             for freqBan in freqData.splitlines():
@@ -161,11 +165,22 @@ class WavFile(object):
                 for dataPoint in freqBan.split('/'):
                     if dataPoint != '':
                         specData.append(int(dataPoint))
-                dataList.append(specData)
+                result.append(specData)
+        self.frequencySpectrumData = result
+
         
     def frameData(self, chunkSize, chunk ):
         data = self.rawFileData
         return data[chunkSize * chunk : chunkSize * (chunk + 1)]
+
+    # This function must be called at the beginning of every level.
+    def configureSpectrumData(self):
+        path = 'songData/' + self.songDataFilename
+        if os.path.isfile(path):
+            self.readFrequencyDataFile()
+        else:
+            self.writeFrequencyDataToFile(self.freqSpectrums())
+            self.readFrequencyDataFile()
 
 
 #testFile = WavFile('notesTest3.wav', 2205)
@@ -178,6 +193,9 @@ class WavFile(object):
 
 #print(testFile.lenInSamples)
 #print(len(testFile.loudnessPerChunk))
+#testFile.writeFrequencyDataToFile(testFile.freqSpectrums())
+
+
 
 
 

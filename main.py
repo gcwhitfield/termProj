@@ -32,7 +32,7 @@ class MetaData:
         )
         self.brightness = 50 # out of a max of 100
         self.mainMenu = mainMenu.MainMenu(self, self.screen)
-        self.song = 'gcslevel1.wav'
+        self.song = 'ramune.wav'
         self.animationFrameTime = 1/60
         
         self.gameData = game.GameData(self, self.screen, self.song)
