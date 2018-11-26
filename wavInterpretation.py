@@ -78,6 +78,7 @@ class WavFile(object):
         self.loudnessPerChunk = self.getLoudnessPerChunk()
         self.maxLoudness = max(self.loudnessPerChunk)
         self.songDataFilename = self.fileName + '.txt'
+        self.lowMidHighData = []
 
     # evaluate the fourier transform for a given frequency  ````
     def fourierEvaluate(self, wavData, frequency):
@@ -181,8 +182,87 @@ class WavFile(object):
         else:
             self.writeFrequencyDataToFile(self.freqSpectrums())
             self.readFrequencyDataFile()
+        self.lowMidHighData = self.lowsMidsHighsSpectrum(self.frequencySpectrumData)
 
+    # get lows, mids, and highs data for 1 interval
+    def lowsMidsHighs(self, freqData):
+        # lows = result[0], mids = result[1], highs = result[2]
+        result = []
+        for i in range(3):
+            total = 0
+            for dataIndex in range(len(freqData)//3):
+                index = (i * (len(freqData)//3)) + dataIndex
+                dataPoint = freqData[index]
+                total += dataPoint
+            total = total // (len(freqData) // 3)
+            result.append(total)
+        return result
 
+    # get lows, mids, and highs data for the whole song
+    def lowsMidsHighsSpectrum(self, freqSpectrums):
+        result = []
+        for spectrum in freqSpectrums:
+            result.append(self.lowsMidsHighs(spectrum))
+        return result
+    
+    # calculate the intensity for one portion of the song
+    def calculateIntensity(self, lowsMidsHighsData, loudness, interval):
+        intensity = 0
+        loudnessAverage = 0
+        print('loudness')
+        print(len(loudness))
+        print('lowshighs')
+        print(len(lowsMidsHighsData))
+        for spec in range(len(lowsMidsHighsData)):
+            low = lowsMidsHighsData[spec][0]
+            mid = lowsMidsHighsData[spec][1]
+            high = lowsMidsHighsData[spec][2]
+            if low > mid > high:
+                intensity += 3
+            elif mid > low > high:
+                intensity += 2
+            else:
+                intensity += 1
+            
+            # if we have loudness data for this interval, then use it. Else, add 1 to 
+            # loudnessAverage value
+            print('spec')
+            print(spec)
+            if spec > len(loudness) - 1:
+                loudnessAverage += 1
+            else:
+                if loudness[spec] > self.averageLoudness * 1.7:
+                    loudnessAverage += 3
+                else:
+                    loudnessAverage += 1
+
+            
+        intensity = intensity + loudnessAverage
+        intensity = intensity / (self.lenInSamples//interval)
+        return intensity
+
+    #calc intensity for the whole song
+    # the interval is a length in samples that we want to get data about :)
+    def calcIntensityForWholeSong(self, interval):
+        result = []
+        numChunks = self.lenInSamples // self.chunkSize
+        intervalLenInChunks = numChunks // (self.lenInSamples // interval)
+        for i in range(numChunks):
+            beginning = intervalLenInChunks * i
+            end = intervalLenInChunks * (i + 1)
+            print('beginning: ' + str(beginning))
+            print('end: ' + str(end))
+            if end > self.lenInSamples:
+                end = self.lenInSamples
+                result.append(self.calculateIntensity(self.lowMidHighData[beginning:end], self.loudnessPerChunk[beginning:end], interval))
+                break
+            result.append(self.calculateIntensity(self.lowMidHighData[beginning:end], self.loudnessPerChunk[beginning:end], interval))
+        # normalize all of the intensity values to be between 0 and 1
+        for i in range(len(result)):
+            result[i] /= max(result)
+        return result
+
+    
 #testFile = WavFile('notesTest3.wav', 2205)
 
 #print(testFile.lenInSamples)

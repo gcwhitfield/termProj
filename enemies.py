@@ -3,6 +3,7 @@
 
 import random
 import pygame
+import colors
 
 class Enemy:
     def __init__(self, metaData, size = None, speed = None):
@@ -24,9 +25,10 @@ class BoxEnemy(Enemy):
     def __init__(self, metaData, size=None, speed=None):
         super().__init__(metaData, size=size, speed=speed)
         self.rect = pygame.Rect(self.posx, self.posy, self.size, self.size)
+        self.color = colors.Colors().RED
 
     def draw(self):
-        pygame.draw.rect(self.metaData.screen, (100, 100, 100), self.rect, 0)
+        pygame.draw.rect(self.metaData.screen, self.color, self.rect, 0)
 
     def move(self): # move normally
         self.posx += self.speed * 0.5

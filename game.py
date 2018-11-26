@@ -49,7 +49,12 @@ class GameData:
         self.averageLoudness = self.songObject.averageLoudness
         self.songObject.configureSpectrumData()
         self.musicSpectrums = self.songObject.frequencySpectrumData
-    
+        self.lowsMidsHighsValues = self.songObject.lowsMidsHighsSpectrum(self.musicSpectrums)
+
+        self.intensityInterval = self.songObject.sampleRate * 10 # five seconds
+        self.intensityData = self.songObject.calcIntensityForWholeSong(self.intensityInterval)
+        self.currIntensityInterval = 0
+
     def drawBackground(self, screen):
         screen.fill(self.backgroundColor)
 
@@ -69,7 +74,6 @@ class GameData:
             rect = pygame.Rect(posx, posy, rectWidth - rectBorder, height)
             pygame.draw.rect(screen, (100, 0, 100), rect, 0)
 
-
     def drawGameScreen(self, screen):
         self.drawBackground(screen)
         self.displayAudioSpectrumBackground(screen)
@@ -80,8 +84,6 @@ class GameData:
         for enemy in self.enemies:
             enemy.draw()
 
-
-   
     # execute the audio at the start of the level
     def playAudio(self):
         if self.audioStarted == False:
@@ -95,20 +97,22 @@ class GameData:
     def isOnBeat(self):
         frameData = self.songLoudnessData[self.gameTime]
         if frameData > self.averageLoudness * 1.7:
-            self.beatFired()
+            return True
         else:
-            pass
+            return False
 
     def beatFired(self):
         for enemy in self.enemies:
             enemy.beatMove()
 
-    
-
     # RUNS EVERY 1/60 OF A SECOND
     def timerFired(self, frameData): # playAudio will call timerFired
         self.gameTime += 1
-        self.isOnBeat()
+        if self.isOnBeat():
+            self.beatFired()
         for enemy in self.enemies:
             enemy.move()
             enemy.isCollidingWithWall()
+        if (self.gameTime % 600) == 0:
+            self.currIntensityInterval += 1
+            print(self.intensityData[self.currIntensityInterval])
