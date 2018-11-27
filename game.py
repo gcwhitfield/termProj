@@ -48,6 +48,7 @@ class GameData:
         self.coinSpawnFrequency = 60 # the number of animation frames in between each coin spawn
         self.score = 0
         self.maxScore = 0
+        self.COIN_DRAW_LOCK = False # make sure we don't draw to draw and remove coins at the same time
         
         # initialize the music
         self.musicThread = threading.Thread(target = threadPlayAudio.run, args = (self,))
@@ -67,10 +68,11 @@ class GameData:
 
         self.intensityData = self.songObject.calcIntensityForWholeSong(self.intensityInterval)
         self.currIntensityInterval = 0
-
+        
         # enemy data
         self.enemySpawnFrequency = 60 # spawn every second
-
+        self.ENEMY_DRAW_LOCK = False # lock on drawing enemies and removing them
+                
     def drawBackground(self, screen):
         screen.fill(self.backgroundColor)
 
@@ -184,9 +186,10 @@ class GameData:
             enemy.wallCollide()
 
     def drawEnemies(self):
+        self.ENEMY_DRAW_LOCK = True
         for enemy in self.enemies:
             enemy.draw()
-
+        self.ENEMY_DRAW_LOCK = False
     # remove all of the dead enemies
     def removeDeadEnemies(self):
         removeEnemiesToRemove = set()
@@ -213,6 +216,7 @@ class GameData:
             self.coinsToRemove.remove(coin)
 
     def coinBehavior(self):
+        self.COIN_DRAW_LOCK = True
         for coin in self.coins:
             coin.draw()
             # also handle the life drain of coins
@@ -220,7 +224,7 @@ class GameData:
             if coin.isCollidingWithPlayer():
                 self.score += 1
                 coin.life = 0
-
+        self.COIN_DRAW_LOCK = False
     # RUNS EVERY 1/60 OF A SECOND
     def timerFired(self, frameData): # playAudio will call timerFired
         if self.gameTime >= len(self.songLoudnessData ) - 1: # if we are at the end of the song, then 
@@ -230,8 +234,11 @@ class GameData:
         if self.currScreen == 'game':
             self.gameTime += 1 # gameTime = current animation frame
 
-            self.removeDeadEnemies()
-            self.removeDeadCoins()
+            if not self.ENEMY_DRAW_LOCK:
+                self.removeDeadEnemies()
+
+            if not self.COIN_DRAW_LOCK:
+                self.removeDeadCoins()
 
             if self.isOnBeat():
                 self.beatFired()
@@ -242,9 +249,11 @@ class GameData:
                 self.currIntensityInterval += 1
                 print(self.intensityData[self.currIntensityInterval])
             
-            if self.gameTime % self.enemySpawnFrequency == 0: # add enemies
-                self.addEnemy()
+            if not self.ENEMY_DRAW_LOCK:
+                if self.gameTime % self.enemySpawnFrequency == 0: # add enemies
+                    self.addEnemy()
             
-            if self.gameTime % self.coinSpawnFrequency == 0:
-                self.addCoin()
+            if not self.COIN_DRAW_LOCK:
+                if self.gameTime % self.coinSpawnFrequency == 0:
+                    self.addCoin()
             

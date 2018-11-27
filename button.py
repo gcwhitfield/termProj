@@ -120,7 +120,7 @@ class SongSelectButton(MainMenuButton):
 
     def drawButton(self, screen):
         image = pygame.image.load(self.unselectedImg)
-        if self.metaData.song == self.songFilePath:
+        if self.metaData.song == 'Music/' + self.songFilePath:
             image = pygame.image.load(self.selectedImg)
         rect = image.get_rect()
         rect.centerx = self.posx + 20
