@@ -42,6 +42,11 @@ class BoxEnemy(Enemy):
         if self.posx < 0:
             self.metaData.gameData.enemiesToRemove.add(self)
 
+    def isCollidingWithPlayer(self):
+        player = self.metaData.gameData.player
+        return player.posx < (self.posx + self.size) < player.posx + player.size * 2 and \
+               player.posy < (self.posy + self.size) < player.posy + player.size * 2
+
 class NoodleEnemy(Enemy):
     def __init__(self, metaData, size=None, speed=None):
         super().__init__(metaData, size=size, speed=speed)

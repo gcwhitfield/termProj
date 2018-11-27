@@ -34,7 +34,7 @@ class MetaData:
         )
         self.brightness = 50 # out of a max of 100
         
-        self.song = 'notestest2.wav'
+        self.song = 'Music/restart.wav'
         self.animationFrameTime = 1/60
         
 

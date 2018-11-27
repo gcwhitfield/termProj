@@ -18,7 +18,7 @@ class MainMenu:
             'play'
         )
         self.backgroundColor = (0, 0, 0) # rgb values
-
+        self.beatDownImagePath = 'ImageAssets/beatdown.png'
         self.mainMenuButtonSpacing = 100
         self.mainMenuButtons = set([
             MainMenuButton(self.metaData.width//2, self.metaData.height//2, # position
@@ -76,11 +76,19 @@ class MainMenu:
         
     def drawBackGround(self, screen):
         screen.fill(self.backgroundColor)
-
+    
+    def drawBeatDownImage(self, screen):
+        image = pygame.image.load(self.beatDownImagePath)
+        rect = image.get_rect()
+        rect.centerx = self.metaData.width // 2
+        rect.centery = self.metaData.height // 2 - 150
+        screen.blit(image, rect)
+    
     def drawMainMenu(self, screen):
         for tup in self.mainMenuButtons:
             for button in tup:
                 button.draw(screen)
+        self.drawBeatDownImage(screen)
 
     def drawOptionsScreen(self, screen):
         for tup in self.optionsButtons:
