@@ -1,5 +1,9 @@
 # George Whitfield
 # 15-112 Term Project 2018
+# This is the most important file of the project. It takes the raw data from a 
+# wav file and turns it into neatly formatted lists that the rest of the game can
+# interpret easily 
+
 import moduleManager
 moduleManager.review()
 
@@ -262,21 +266,3 @@ class WavFile(object):
         for i in range(len(result)):
             result[i] /= max(result)
         return result
-
-    
-#testFile = WavFile('notesTest3.wav', 2205)
-
-#print(testFile.lenInSamples)
-
-#print(testFile.chunkSize)
-#testFile.displayAudioSpectrum()
-#testFile.displayAudioSpectrum()
-
-#print(testFile.lenInSamples)
-#print(len(testFile.loudnessPerChunk))
-#testFile.writeFrequencyDataToFile(testFile.freqSpectrums())
-
-
-
-
-

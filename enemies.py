@@ -1,5 +1,6 @@
 # George Whitfield
 # 15-112 Term Project 2018
+# Data about the enemies in the game
 
 import random
 import pygame
@@ -31,7 +32,7 @@ class BoxEnemy(Enemy):
         pygame.draw.rect(self.metaData.screen, self.color, self.rect, 0)
 
     def move(self): # move normally
-        self.posx -= self.speed * 0.5
+        self.posx -= self.speed * 0.25
         self.rect = pygame.Rect(self.posx, self.posy, self.size, self.size)
     
     def beatMove(self): # move extra on the beat

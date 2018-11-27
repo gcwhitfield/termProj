@@ -1,9 +1,12 @@
 # George Whitfield 
 # 15-112 Term Project 2018
+# Run the game
 
 import sys
 import pygame
 import wave
+import os
+
 # game classes
 import mainMenu
 import game
@@ -26,7 +29,6 @@ class MetaData:
                 self.height  # y size of the screen
             ]
         )
-        self.mainMenu = mainMenu.MainMenu(self, self.screen)
         self.currScreen = 'menu'
         self.screens = (
             'menu',
@@ -34,25 +36,21 @@ class MetaData:
         )
         self.brightness = 50 # out of a max of 100
         
-        self.song = 'Music/restart.wav'
+        self.songsFolder = 'Music/'
+        self.song = ''
         self.animationFrameTime = 1/60
-        
+        self.mainMenu = mainMenu.MainMenu(self, self.screen)
 
         self.emptyGameData = game.GameData
-        self.gameData = game.GameData(self, self.screen, self.song)
-        self.songData = game.SongData(self)
-        self.audioThread = self.gameData.musicThread
+        if os.path.isfile(self.song):
+            self.gameData = game.GameData(self, self.screen, self.song)
+            self.audioThread = self.gameData.musicThread
 
 # define game variables
 metaData = MetaData()
 
 # start pygame
 pygame.init()
-
-
-#pygame.mixer.music.load('anote.wav')
-#pygame.mixer.music.play(-1)
-
 
 def drawMainMenu(screen, data):
     data.mainMenu.run(screen)

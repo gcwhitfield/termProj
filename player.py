@@ -1,3 +1,7 @@
+# George Whitfield 
+# 15-112 Term Project 2018
+# Player Class
+
 import pygame
 import colors
 

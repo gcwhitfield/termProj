@@ -1,5 +1,6 @@
 # George Whitfield
 # 15-112 Term Project 2018
+# This file runs the 'game' mode where the user listens to the song and plays the level
 
 import pygame
 import wave

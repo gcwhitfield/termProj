@@ -1,12 +1,70 @@
 # George Whitfield
 # 15-112 Term Project 2018
+# The data and logic for the main menu
 
 import sys
-from button import MainMenuButton, StartLevelButton
+from button import MainMenuButton, StartLevelButton, SongSelectButton
 from colors import Colors
 import pygame
+import os
+
+class SongSelectButtonsGroup:
+    # create a list of buttons based on the songs in our Music directory
+    def createButtonObjectsFromFilePaths(self):
+        buttonObjectLst = []
+        for path in self.buttonsFilePaths:
+            buttonObjectLst.append(SongSelectButton(0, 0, 
+            self.metaData.width, self.buttonHeight,
+            self.backgroundColor,
+            self.metaData,
+            path
+            ))
+        return buttonObjectLst
+
+    def __init__(self, metaData, buttonFilePaths, buttonHeight):
+        self.metaData = metaData
+        self.buttonHeight = buttonHeight
+        self.backgroundColor = Colors().BLACK
+        self.buttonsFilePaths = buttonFilePaths
+        self.buttonObjects = self.createButtonObjectsFromFilePaths()
+        self.buttonsPerScreen = ((self.metaData.height - 200) // self.buttonHeight) - 1
+        self.currentScreen = 0
+        self.numberOfScreens = len(self.buttonObjects) // self.buttonsPerScreen
+
+    # handle song selection button mouse cick
+    def mouseClicked(self, mousePos, buttonsOnScreen):
+        for button in buttonsOnScreen:
+            if button.isClicked(mousePos):
+                button.onClick()
+
+    # draw the buttons and check to see if the buttons are clicked
+    # I'm violating the principles of model, view, controller so that I can easily check clicks
+    def draw(self, screen):
+        buttonsOnScreen = set()
+        for i in range(self.buttonsPerScreen):
+            buttonIndex = i + (self.numberOfScreens * self.currentScreen)
+            if buttonIndex < len(self.buttonObjects):
+                currButton = self.buttonObjects[buttonIndex]
+                currButton.posy = 200 + (i * self.buttonHeight)
+                currButton.draw(screen)
+                buttonsOnScreen.add(currButton)
+        if pygame.mouse.get_pressed()[0]: # get left click
+            mousePos = pygame.mouse.get_pos()
+            self.mouseClicked(mousePos, buttonsOnScreen)
+
+
 # contains the data for the main Menu
 class MainMenu:
+    # initalize the list of song filepaths
+    def initButtons(self):
+        buttonLst = []
+        musicFolder = self.metaData.songsFolder
+        buttons = os.listdir(musicFolder)
+        for song in buttons:
+            if '.DS_Store' not in song: # ignore the store file
+                buttonLst.append(song)
+        return buttonLst
+
     def __init__(self, metaData, screen):
         self.metaData = metaData
         self.screen = screen
@@ -20,6 +78,12 @@ class MainMenu:
         self.backgroundColor = (0, 0, 0) # rgb values
         self.beatDownImagePath = 'ImageAssets/beatdown.png'
         self.mainMenuButtonSpacing = 100
+
+        self.songSelectButtons = SongSelectButtonsGroup(
+            self.metaData, 
+            self.initButtons(), # the list of button filePaths
+            100) # height of each button
+        
         self.mainMenuButtons = set([
             MainMenuButton(self.metaData.width//2, self.metaData.height//2, # position
             100, 50, # size
@@ -73,7 +137,7 @@ class MainMenu:
             self.metaData,
             txtColor = Colors().WHITE),
         ]),
-        
+
     def drawBackGround(self, screen):
         screen.fill(self.backgroundColor)
     
@@ -98,11 +162,15 @@ class MainMenu:
     def drawFileSelect(self, screen):
         pass
 
+    def drawSongSelectButtons(self, screen):
+        self.songSelectButtons.draw(screen)
+
     def drawPlayScreen(self, screen):
         for tup in self.playButtons:
             for button in tup:
                 button.draw(screen)
 
+        self.drawSongSelectButtons(screen)
     def draw(self, screen):
         self.drawBackGround(screen)
         if self.currScreen == 'mainMenu':

@@ -1,5 +1,6 @@
-# copied from stack overflow 
+# copied (mostly) from stack overflow 
 #https://stackoverflow.com/questions/6951046/pyaudio-help-play-a-file
+# this file plays the music
 
 import pyaudio
 import wave
