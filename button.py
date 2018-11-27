@@ -49,14 +49,13 @@ class Button:
         self.drawText(screen)
 
 class MainMenuButton(Button):
-    def __init__(self, posx, posy, width, height, text, backGroundColor, targetScreen, mainMenu,
+    def __init__(self, posx, posy, width, height, text, backGroundColor, targetScreen, metaData,
                 onClickEvent=None, border=0, txtColor=None):
         super().__init__(posx, posy, width, height, text, backGroundColor, onClickEvent=onClickEvent, border=border, txtColor=txtColor)
         self.targetScreen = targetScreen
-        self.mainMenu = mainMenu
+        self.metaData = metaData
 
     def isClicked(self, mousePosition):
-        print('adhaskdjh')
         # mouse position is an (x, y) tuple
         x, y = mousePosition
         if self.posx - self.width//2 < x and self.posx + self.width//2 > x and \
@@ -64,7 +63,34 @@ class MainMenuButton(Button):
             self.onClick()
     
     def onClick(self): # when the button gets clicked, execute the code
-        if self.targetScreen in self.mainMenu.screens:
-            self.mainMenu.currScreen = self.targetScreen
+        print('buttonClicked')
+        print(self.metaData)
+        if self.targetScreen == 'menu':
+            # initialize the gameData every time we click on this button
+            self.metaData.gameData = self.metaData.emptyGameData(self.metaData, self.metaData.screen, self.metaData.song)
+        elif self.targetScreen in self.metaData.mainMenu.screens:
+            self.metaData.mainMenu.currScreen = self.targetScreen 
         elif self.targetScreen == 'quit':
             sys.exit()
+
+class EndLevelButton(MainMenuButton):
+    def __init__(self, posx, posy, width, height, text, backGroundColor, targetScreen, metaData, onClickEvent=None, border=0, txtColor=None):
+        super().__init__(posx, posy, width, height, text, backGroundColor, targetScreen, metaData, onClickEvent=onClickEvent, border=border, txtColor=txtColor)
+
+    def onClick(self): # when the button gets clicked, execute the code
+        print('buttonClicked')
+        print(self.metaData)
+        if self.targetScreen == 'menu':
+            # initialize the game every time we click on this button
+            self.metaData.__init__()
+
+class StartLevelButton(MainMenuButton):
+    def __init__(self, posx, posy, width, height, text, backGroundColor, targetScreen, metaData, onClickEvent=None, border=0, txtColor=None):
+        super().__init__(posx, posy, width, height, text, backGroundColor, targetScreen, metaData, onClickEvent=onClickEvent, border=border, txtColor=txtColor)
+
+    def onClick(self): # when the button gets clicked, execute the code
+        print('buttonClicked')
+        print(self.metaData)
+        if self.targetScreen == 'game':
+            # initialize the gameData every time we click on this button
+            self.metaData.currScreen = 'game'

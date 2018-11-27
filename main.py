@@ -17,24 +17,28 @@ import colors
 
 class MetaData:
     def __init__(self):
-        self.width = 800
+        self.width = 1200
         self.height = 800
+        self.chunkSize = 735
         self.screen = pygame.display.set_mode(
             [
                 self.width, # x size of the screen
                 self.height  # y size of the screen
             ]
         )
-        self.gameState = 'game'
-        self.possibleGameStates = (
+        self.mainMenu = mainMenu.MainMenu(self, self.screen)
+        self.currScreen = 'menu'
+        self.screens = (
             'menu',
             'game',
         )
         self.brightness = 50 # out of a max of 100
-        self.mainMenu = mainMenu.MainMenu(self, self.screen)
-        self.song = 'ramune.wav'
+        
+        self.song = 'notestest2.wav'
         self.animationFrameTime = 1/60
         
+
+        self.emptyGameData = game.GameData
         self.gameData = game.GameData(self, self.screen, self.song)
         self.songData = game.SongData(self)
         self.audioThread = self.gameData.musicThread
@@ -56,10 +60,10 @@ def drawMainMenu(screen, data):
 def drawGame(screen, data):
     data.gameData.runGame()
 
-def drawDisplay(                                                                                        screen, data):
-    if data.gameState == 'menu':
+def drawDisplay(screen, data):
+    if data.currScreen == 'menu':
         drawMainMenu(screen, data)
-    elif data.gameState == 'game':
+    elif data.currScreen == 'game':
         drawGame(screen, data)
 
 colo = colors.Colors()
@@ -69,9 +73,6 @@ while 1: # run the pygame window
             metaData.audioThread.join()
             sys.exit()
     metaData.screen.fill((0, 0, 0))
-    cursorPos = pygame.mouse.get_pos()
-    drawDisplay(metaData.screen, metaData)
 
-    rect = pygame.Rect(cursorPos, (50, 50))
-    pygame.draw.rect(metaData.screen, colo.GREEN, rect, 0)
+    drawDisplay(metaData.screen, metaData)
     pygame.display.flip()

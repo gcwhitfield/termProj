@@ -2,7 +2,7 @@
 # 15-112 Term Project 2018
 
 import sys
-from button import MainMenuButton
+from button import MainMenuButton, StartLevelButton
 from colors import Colors
 import pygame
 # contains the data for the main Menu
@@ -26,7 +26,7 @@ class MainMenu:
             'PLAY', # text
             self.backgroundColor, # background color
             'play', # click destination
-            self, # MainMenu
+            self.metaData, # MainMenu
             txtColor = Colors().WHITE), # text color
 
             MainMenuButton(self.metaData.width//2,
@@ -35,7 +35,7 @@ class MainMenu:
             'OPTIONS',
             self.backgroundColor,
             'options',
-            self,
+            self.metaData,
             txtColor = Colors().WHITE),
 
             MainMenuButton(self.metaData.width//2,
@@ -44,7 +44,7 @@ class MainMenu:
             'QUIT',
             self.backgroundColor,
             'quit',
-            self,
+            self.metaData,
             txtColor = Colors().WHITE) # exit the game if button clicked
         ]),
         self.optionsButtons = set([
@@ -53,7 +53,7 @@ class MainMenu:
             'BACK',
             self.backgroundColor,
             'mainMenu',
-            self,
+            self.metaData,
             txtColor = Colors().WHITE),
         ]),
         self.playButtons = set([
@@ -62,7 +62,15 @@ class MainMenu:
             'BACK',
             self.backgroundColor,
             'mainMenu',
-            self,
+            self.metaData,
+            txtColor = Colors().WHITE),
+
+            StartLevelButton(self.metaData.width//2, 100,
+            100, 50,
+            'START',
+            self.backgroundColor,
+            'game',
+            self.metaData,
             txtColor = Colors().WHITE),
         ]),
         

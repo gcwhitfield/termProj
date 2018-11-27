@@ -83,7 +83,8 @@ class WavFile(object):
     # evaluate the fourier transform for a given frequency  ````
     def fourierEvaluate(self, wavData, frequency):
         result = 0
-        for j in range(0, self.chunkSize, 2):
+        # for j in range(0, self.chunkSize * 2, 2):
+        for j in range(0, len(wavData) - 1, 2):
             dataPoint = wavData[j]
             i = complex(0, 1)
             k = (frequency/self.sampleRate) * 500
@@ -109,8 +110,8 @@ class WavFile(object):
     def freqSpectrums(self):
         result = []
         for i in range(len(self.data)//self.chunkSize):
-            index1 = self.chunkSize * i
-            index2 = self.chunkSize * (i + 1)
+            index1 = self.chunkSize * 2 * i
+            index2 = self.chunkSize * 2 * (i + 1)
             result.append(self.getFrequencySpectrum(self.data[index1:index2]))
             print('Spectrum ' + str(i) + ' analyzed!')
         return result
@@ -132,12 +133,12 @@ class WavFile(object):
     # use the room mean square (RMS) to calculate the loudness of a chunk of audio
     def getLoudnessPerChunk(self):
         result = []
-        for chunk in range((self.lenInSamples)//(self.chunkSize//2)):
-            offset = int((self.chunkSize) * chunk) # manipulate this value to change how the data lines up with the music
+        for chunk in range((self.lenInSamples)//(self.chunkSize)):
+            offset = int((self.chunkSize * 2) * chunk) # manipulate this value to change how the data lines up with the music
             chunkAverageLoudness = 0
-            for dataPoint in range(self.chunkSize):
+            for dataPoint in range(self.chunkSize * 2):
                 chunkAverageLoudness += self.data[offset + dataPoint] ** 2 # add squares
-            chunkAverageLoudness = chunkAverageLoudness / self.chunkSize # divide
+            chunkAverageLoudness = chunkAverageLoudness / self.chunkSize * 2 # divide
             chunkAverageLoudness = chunkAverageLoudness ** 0.5 # square root
             result.append(chunkAverageLoudness)
         return result
@@ -172,7 +173,7 @@ class WavFile(object):
         
     def frameData(self, chunkSize, chunk ):
         data = self.rawFileData
-        return data[chunkSize * chunk : chunkSize * (chunk + 1)]
+        return data[chunkSize * 2 * chunk : chunkSize * 2 * (chunk + 1)]
 
     # This function must be called at the beginning of every level.
     def configureSpectrumData(self):
@@ -245,7 +246,7 @@ class WavFile(object):
     # the interval is a length in samples that we want to get data about :)
     def calcIntensityForWholeSong(self, interval):
         result = []
-        numChunks = self.lenInSamples // self.chunkSize
+        numChunks = self.lenInSamples // (self.chunkSize * 2)
         intervalLenInChunks = numChunks // (self.lenInSamples // interval)
         for i in range(numChunks):
             beginning = intervalLenInChunks * i
