@@ -20,6 +20,7 @@ import colors
 
 class MetaData:
     def __init__(self):
+        self.CLOSE_GAME = False
         self.width = 1200
         self.height = 800
         self.chunkSize = 735
@@ -68,7 +69,8 @@ colo = colors.Colors()
 while 1: # run the pygame window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            metaData.audioThread.join()
+            metaData.CLOSE_GAME = True
+            metaData.gameData.musicThread.join()
             sys.exit()
     metaData.screen.fill((0, 0, 0))
 

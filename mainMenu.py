@@ -27,7 +27,7 @@ class SongSelectButtonsGroup:
         self.backgroundColor = Colors().BLACK
         self.buttonsFilePaths = buttonFilePaths
         self.buttonObjects = self.createButtonObjectsFromFilePaths()
-        self.buttonsPerScreen = ((self.metaData.height - 200) // self.buttonHeight) - 1
+        self.buttonsPerScreen = ((self.metaData.height - 200) // self.buttonHeight)
         self.currentScreen = 0
         self.numberOfScreens = len(self.buttonObjects) // self.buttonsPerScreen
 
@@ -41,11 +41,13 @@ class SongSelectButtonsGroup:
     # I'm violating the principles of model, view, controller so that I can easily check clicks
     def draw(self, screen):
         buttonsOnScreen = set()
+        leftMarginWidth = 100
         for i in range(self.buttonsPerScreen):
             buttonIndex = i + (self.numberOfScreens * self.currentScreen)
             if buttonIndex < len(self.buttonObjects):
                 currButton = self.buttonObjects[buttonIndex]
                 currButton.posy = 200 + (i * self.buttonHeight)
+                currButton.posx = leftMarginWidth
                 currButton.draw(screen)
                 buttonsOnScreen.add(currButton)
         if pygame.mouse.get_pressed()[0]: # get left click

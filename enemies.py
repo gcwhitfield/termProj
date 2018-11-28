@@ -27,16 +27,30 @@ class BoxEnemy(Enemy):
         super().__init__(metaData, size=size, speed=speed)
         self.rect = pygame.Rect(self.posx, self.posy, self.size, self.size)
         self.color = colors.Colors().RED
+        self.minSize = self.size
+        self.maxSize = self.minSize * 1.5
+        self.growFactor = 1
 
     def draw(self):
         pygame.draw.rect(self.metaData.screen, self.color, self.rect, 0)
 
+    def shrink(self):
+        if self.size > self.minSize:
+            self.size -= self.growFactor
+
+    def grow(self):
+        if self.size < self.maxSize:
+            self.size += self.growFactor
+    
     def move(self): # move normally
         self.posx -= self.speed * 0.25
         self.rect = pygame.Rect(self.posx, self.posy, self.size, self.size)
+        # also handle grow and shrink behavior
+        self.shrink()
     
     def beatMove(self): # move extra on the beat
-        self.posx -= self.speed
+        self.posx -= self.speed * 1.5
+        self.grow()
         self.rect = pygame.Rect(self.posx, self.posy, self.size, self.size)
 
     def wallCollide(self):

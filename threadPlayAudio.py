@@ -38,6 +38,8 @@ def run(info):
         # writing to the stream is what *actually* plays the sound.
         stream.write(data)
         info.timerFired(data)
+        if info.metaData.CLOSE_GAME:
+            break
     # cleanup stuff.
     stream.close()    
     p.terminate()
