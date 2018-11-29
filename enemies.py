@@ -99,7 +99,6 @@ class ShootySpinnyEnemy(Enemy):
 
     def draw(self):
         self.calculateCenterCoordinates()
-
         # the shooty spinny enemy is made up of two pieces - the circle, and the rectangle
         circ = self.getGunData()
         pygame.draw.circle(self.metaData.screen, self.color, circ, self.gunDistanceFromCenter//2)
@@ -151,10 +150,10 @@ class Bullet(Enemy):
 
     # a collision for the bullet object is hitting any wall
     def wallCollide(self):
-        if self.posx < 100 or \
-        self.posx > self.metaData.width - 100 or \
-        self.posy < 100 or \
-        self.posy > self.metaData.height - 100:
+        if self.posx < 0 - self.size or \
+        self.posx > self.metaData.width + self.size or \
+        self.posy < 0 - self.size or \
+        self.posy > self.metaData.height + self.size:
             self.metaData.gameData.enemiesToRemove.add(self)
             self.isDead = True
     
@@ -173,7 +172,6 @@ class Bullet(Enemy):
             (int(self.posx), int(self.posy)),
             int(self.size)
             )
-
 
 # a coin isnt an enemy but it's easier to store this class in this file
 class Coin:

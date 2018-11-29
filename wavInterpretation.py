@@ -103,7 +103,6 @@ class WavFile(object):
             width = freqs[1] - freqs[0]
             step = width // self.calculationsPerFreqBand
             for i in range(self.calculationsPerFreqBand):
-                #print('i = ' + str(i))
                 currFreq = freqs[0] + (i * step)
                 result.append(
                     self.fourierEvaluate(wavData, currFreq)
@@ -125,7 +124,6 @@ class WavFile(object):
         t = numpy.array(range(self.calculationsPerFreqBand * len(self.frequencyBands)))
         plt.show()
         spectrums = self.freqSpectrums()
-        print('calc complete')
         for spectrum in spectrums:
             s = numpy.array(spectrum)
             plt.cla()
@@ -150,7 +148,6 @@ class WavFile(object):
     # take the frequency data and save it as a text file
     def writeFrequencyDataToFile(self, freqData):
         result = ''
-        #print(freqData)
         for spectrum in freqData:
             for dataPoint in spectrum:
                 result += str(int(dataPoint)) + '/'
@@ -161,7 +158,6 @@ class WavFile(object):
 
     # read the frequency text file
     def readFrequencyDataFile(self): # MUTABLE function
-        print('aksdhaksjhaksjhdkasjdhkjh')
         result = []
         with open('songData/' + self.songDataFilename, 'r') as f:
             freqData = f.read()
@@ -214,10 +210,6 @@ class WavFile(object):
     def calculateIntensity(self, lowsMidsHighsData, loudness, interval):
         intensity = 0
         loudnessAverage = 0
-        print('loudness')
-        print(len(loudness))
-        print('lowshighs')
-        print(len(lowsMidsHighsData))
         for spec in range(len(lowsMidsHighsData)):
             low = lowsMidsHighsData[spec][0]
             mid = lowsMidsHighsData[spec][1]
@@ -231,8 +223,6 @@ class WavFile(object):
             
             # if we have loudness data for this interval, then use it. Else, add 1 to 
             # loudnessAverage value
-            print('spec')
-            print(spec)
             if spec > len(loudness) - 1:
                 loudnessAverage += 1
             else:
@@ -255,8 +245,6 @@ class WavFile(object):
         for i in range(numChunks):
             beginning = intervalLenInChunks * i
             end = intervalLenInChunks * (i + 1)
-            print('beginning: ' + str(beginning))
-            print('end: ' + str(end))
             if end > self.lenInSamples:
                 end = self.lenInSamples
                 result.append(self.calculateIntensity(self.lowMidHighData[beginning:end], self.loudnessPerChunk[beginning:end], interval))

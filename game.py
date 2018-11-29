@@ -9,6 +9,7 @@ import threading
 import threadPlayAudio
 import threading
 from enemies import *
+from decorations import *
 from player import Player
 from button import EndLevelButton
 from colors import Colors
@@ -51,6 +52,14 @@ class GameData:
         self.maxScore = 0
         self.COIN_DRAW_LOCK = False # make sure we don't draw to draw and remove coins at the same time
         
+        # decorations data
+        self.numDecs = 200
+        self.decorations = set()
+        self.initalizeDecorations()
+        self.decorationsToRemove = set()
+        self.decorationsToAdd = set()
+        self.DECORATIONS_LOCK = False
+
         # initialize the music
         self.musicThread = threading.Thread(target = threadPlayAudio.run, args = (self,))
         self.audioStarted = False
@@ -78,10 +87,17 @@ class GameData:
             'box': 1,
             'spinny': 5
         }
-                
+
+    # run game. This gets called every PyGame frame
+    def runGame(self):
+        self.playAudio()
+        self.drawGameScreen(self.screen)
+
+    # draw background of the game 
     def drawBackground(self, screen):
         screen.fill(self.backgroundColor)
 
+    # display the cool audio spectrum in the background
     def displayAudioSpectrumBackground(self, screen):
         rectBorder = 5
         currSpectrum = self.musicSpectrums[self.gameTime]
@@ -98,23 +114,27 @@ class GameData:
             rect = pygame.Rect(posx, posy, rectWidth - rectBorder, height)
             pygame.draw.rect(screen, (100, 0, 100), rect, 0)
 
+    # fire when the mouse is clicked
     def mouseClicked(self, mousePos, buttons): # check if clicked on button
             for button in buttons:
                 if button.isClicked(mousePos):
                     button.onClick()
-        
+    
+    # draw the stuff on the game screen
     def drawGameScreen(self, screen):
         if self.currScreen == 'game':
             self.drawBackground(screen)
+            
             self.displayAudioSpectrumBackground(screen)
-
+            self.decorationBehavior()
             self.coinBehavior()
             self.enemyBehavior()
-
+            
             self.player.draw()
         elif self.currScreen == 'endLevel':
             self.drawEndLevelScreen(screen)
 
+    # draw the end level screen
     def drawEndLevelScreen(self, screen):
         cursorPos = pygame.mouse.get_pos()
         # draw the text
@@ -155,10 +175,7 @@ class GameData:
             self.audioStarted = True
             self.musicThread.start()
 
-    def runGame(self):
-        self.playAudio()
-        self.drawGameScreen(self.screen)
-    
+    # returns true if music is on the beat
     def isOnBeat(self):
         frameData = self.songLoudnessData[self.gameTime]
         if frameData > self.averageLoudness * 2:
@@ -166,12 +183,15 @@ class GameData:
         else:
             return False
 
+    # fire when on the beat
     def beatFired(self): # beatMove the enemies
         for enemy in self.enemies:
             enemy.beatMove()
-
+        self.beatMoveDecorations()
+    # fire when not on the beat
     def nonBeatFired(self):
         self.moveEnemies()
+        self.moveDecorations()
 
     def spawnEnemiesBasedOnInensity(self):
         inten = self.intensityData[self.currIntensityInterval]
@@ -191,17 +211,19 @@ class GameData:
         if 0.7 < currIntensity < 1: # high intensity
             enemy = ShootySpinnyEnemy(self.metaData)
         elif 0.5 < currIntensity < 0.7: # medium intensity
-            enemy = ShootySpinnyEnemy(self.metaData)
+            enemy = BoxEnemy(self.metaData)
         elif currIntensity < 0.5: # low intensity
-            enemy = ShootySpinnyEnemy(self.metaData)
+            enemy = BoxEnemy(self.metaData)
         
         self.enemies.add(enemy)
 
+    # when not on beat, move enemies normally. Also handle wall collisions
     def moveEnemies(self):
         for enemy in self.enemies:
             enemy.move()
             enemy.wallCollide()
 
+    # draw the enemies and handle player collisions
     def enemyBehavior(self): # draw the enemies and handle the collisions
         self.ENEMY_DRAW_LOCK = True
         for enemy in self.enemies:
@@ -249,27 +271,63 @@ class GameData:
                 coin.life = 0
         self.COIN_DRAW_LOCK = False
     
+    # decorations methods
+    def initalizeDecorations(self):
+        for dec in range(self.numDecs):
+            self.decorations.add(Sparkle(self.metaData))
+    # draw decs and handle collisions
+    def decorationBehavior(self):
+        self.DECORATIONS_LOCK = True
+        for dec in self.decorations:
+            dec.draw()
+            dec.leaveScreenBehavior()
+        self.DECORATIONS_LOCK = False
+    
+    def addNewDecorations(self):
+        for dec in self.decorationsToAdd:
+            self.decorations.add(dec)
+        self.decorationsToAdd = set()
+
+    # when non on beat, move deocorations normally
+    def moveDecorations(self):
+        for dec in self.decorations:
+            dec.move()
+
+    # move decorations on the beat
+    def beatMoveDecorations(self):
+        for dec in self.decorations:
+            dec.beatMove()
+    
+    # remove the decorations that fall off of the screen
+    def removeOldDecorations(self):
+        for dec in self.decorationsToRemove:
+            self.decorations.remove(dec)
+        self.decorationsToRemove = set()
 
     # RUNS EVERY 1/60 OF A SECOND
     def timerFired(self, frameData): # playAudio will call timerFired
         if self.gameTime >= len(self.songLoudnessData ) - 1: # if we are at the end of the song, then 
                 # display the end level screen
                 self.currScreen = 'endLevel'
-
-        print(len(self.enemies))
         # while we are still in game mode
         if self.currScreen == 'game':
             self.gameTime += 1 # gameTime = current animation frame
             
-            
             # only run this if we arent drawing enemies
             if not self.ENEMY_DRAW_LOCK: 
                 self.removeDeadEnemies()
-                self.addBullets() # handle shooting enemy behavior
+                self.addBullets()
+                if self.gameTime % self.enemySpawnFrequency == 0: # add enemies
+                    self.addEnemy() # handle shooting enemy behavior
             # only run if we arent drawing coins
             if not self.COIN_DRAW_LOCK:
                 self.removeDeadCoins()
-
+                if self.gameTime % self.coinSpawnFrequency == 0:
+                    self.addCoin()
+            # only run when not drawing decorations
+            if not self.DECORATIONS_LOCK:
+                self.removeOldDecorations()
+                self.addNewDecorations()
             # handle events on and off of the beat
             if self.isOnBeat():
                 self.beatFired()
@@ -279,14 +337,6 @@ class GameData:
             # run every 5 seconds
             if (self.gameTime % 300) == 0: # update the intensity data 
                 self.currIntensityInterval += 1
-                print(self.intensityData[self.currIntensityInterval])
             
-            
-            if not self.ENEMY_DRAW_LOCK:
-                if self.gameTime % self.enemySpawnFrequency == 0: # add enemies
-                    self.addEnemy()
-
-            if not self.COIN_DRAW_LOCK:
-                if self.gameTime % self.coinSpawnFrequency == 0:
-                    self.addCoin()
+                
             
