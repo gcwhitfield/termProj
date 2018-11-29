@@ -41,6 +41,7 @@ class GameData:
         # set of enemies on screen
         self.enemies = set() 
         self.enemiesToRemove = set()
+        self.bulletsToAdd = set()
 
         # coins data
         self.coins = set()
@@ -73,6 +74,10 @@ class GameData:
         # a lower enemy spawn frequency corresponds to a HIGHER spawn rate
         self.enemySpawnFrequency = 60 # spawn every second
         self.ENEMY_DRAW_LOCK = False # lock on drawing enemies and removing them
+        self.enemySpawnRates = {
+            'box': 1,
+            'spinny': 5
+        }
                 
     def drawBackground(self, screen):
         screen.fill(self.backgroundColor)
@@ -171,18 +176,26 @@ class GameData:
     def spawnEnemiesBasedOnInensity(self):
         inten = self.intensityData[self.currIntensityInterval]
         if inten < 0.25:
-            self.enemySpawnFrequency = 100
+            self.enemySpawnFrequency = 1000
         elif inten < 0.5:
-            self.enemySpawnFrequency = 70
+            self.enemySpawnFrequency = 700
         elif inten < 0.75:
-            self.enemySpawnFrequency = 30
+            self.enemySpawnFrequency = 300
         else:
-            self.enemySpawnFrequency = 10
+            self.enemySpawnFrequency = 2000
     
+    # add an enemy in the game based off of the intensity
     def addEnemy(self):
-        self.enemies.add(
-            BoxEnemy(self.metaData)
-        )
+        currIntensity = self.intensityData[self.currIntensityInterval]
+        enemy = 0
+        if 0.7 < currIntensity < 1: # high intensity
+            enemy = ShootySpinnyEnemy(self.metaData)
+        elif 0.5 < currIntensity < 0.7: # medium intensity
+            enemy = ShootySpinnyEnemy(self.metaData)
+        elif currIntensity < 0.5: # low intensity
+            enemy = ShootySpinnyEnemy(self.metaData)
+        
+        self.enemies.add(enemy)
 
     def moveEnemies(self):
         for enemy in self.enemies:
@@ -197,16 +210,19 @@ class GameData:
                 self.score -= 2
                 self.enemiesToRemove.add(enemy)
         self.ENEMY_DRAW_LOCK = False
+
     # remove all of the dead enemies
     def removeDeadEnemies(self):
-        removeEnemiesToRemove = set()
-        # remove enemy from screen
         for enemy in self.enemiesToRemove:
             self.enemies.remove(enemy)
-            removeEnemiesToRemove.add(enemy)
-        # remove enemy from list of enemies to remove
-        for enemy in removeEnemiesToRemove:
-            self.enemiesToRemove.remove(enemy)
+        self.enemiesToRemove = set()
+    
+    # remove all of the dead enemies
+    def addBullets(self):
+        # remove enemy from screen
+        for bullet in self.bulletsToAdd:
+            self.enemies.add(bullet)
+        self.bulletsToAdd = set()
 
     # add a new coin to the screen
     def addCoin(self):
@@ -240,28 +256,36 @@ class GameData:
                 # display the end level screen
                 self.currScreen = 'endLevel'
 
+        print(len(self.enemies))
+        # while we are still in game mode
         if self.currScreen == 'game':
             self.gameTime += 1 # gameTime = current animation frame
-
-            if not self.ENEMY_DRAW_LOCK:
+            
+            
+            # only run this if we arent drawing enemies
+            if not self.ENEMY_DRAW_LOCK: 
                 self.removeDeadEnemies()
-
+                self.addBullets() # handle shooting enemy behavior
+            # only run if we arent drawing coins
             if not self.COIN_DRAW_LOCK:
                 self.removeDeadCoins()
 
+            # handle events on and off of the beat
             if self.isOnBeat():
                 self.beatFired()
             else:
                 self.nonBeatFired()
 
+            # run every 5 seconds
             if (self.gameTime % 300) == 0: # update the intensity data 
                 self.currIntensityInterval += 1
                 print(self.intensityData[self.currIntensityInterval])
             
+            
             if not self.ENEMY_DRAW_LOCK:
                 if self.gameTime % self.enemySpawnFrequency == 0: # add enemies
                     self.addEnemy()
-            
+
             if not self.COIN_DRAW_LOCK:
                 if self.gameTime % self.coinSpawnFrequency == 0:
                     self.addCoin()
