@@ -35,6 +35,8 @@ class GameData:
         self.isPaused = False
         self.pauseScreen = 0
         self.backgroundColor = (0, 0, 0)
+        # the main color will be used to determine the color of everything else
+        self.mainColor = (0, 0, 0)
 
         # player 
         self.player = Player(self.metaData)
@@ -75,7 +77,7 @@ class GameData:
         self.lengthOfIntensityIntervalInSeconds = 5 # five seconds
         # the number of samples in one intensity interval
         self.intensityInterval = self.songObject.sampleRate * self.lengthOfIntensityIntervalInSeconds 
-
+        self.numAnimationFramesPerIntenInterval = 300
         self.intensityData = self.songObject.calcIntensityForWholeSong(self.intensityInterval)
         self.currIntensityInterval = 0
         
@@ -209,7 +211,7 @@ class GameData:
         currIntensity = self.intensityData[self.currIntensityInterval]
         enemy = 0
         if 0.7 < currIntensity < 1: # high intensity
-            enemy = ShootySpinnyEnemy(self.metaData)
+            enemy = PlusSignShootyEnemy(self.metaData)
         elif 0.5 < currIntensity < 0.7: # medium intensity
             enemy = BoxEnemy(self.metaData)
         elif currIntensity < 0.5: # low intensity
@@ -335,8 +337,5 @@ class GameData:
                 self.nonBeatFired()
 
             # run every 5 seconds
-            if (self.gameTime % 300) == 0: # update the intensity data 
+            if (self.gameTime % self.numAnimationFramesPerIntenInterval) == 0: # update the intensity data 
                 self.currIntensityInterval += 1
-            
-                
-            

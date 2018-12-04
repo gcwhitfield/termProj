@@ -53,9 +53,11 @@ class Button:
         self.drawText(screen)
 
 class MainMenuButton(Button):
-    def __init__(self, posx, posy, width, height, text='', backGroundColor=(0, 0, 0), targetScreen=None, metaData=None,
+    def __init__(self, posx, posy, width, height, text='', backGroundColor=(0, 0, 0), \
+    targetScreen=None, metaData=None,
                 onClickEvent=None, border=0, txtColor=None):
-        super().__init__(posx, posy, width, height, text, backGroundColor, onClickEvent=onClickEvent, border=border, txtColor=txtColor)
+        super().__init__(posx, posy, width, height, text, backGroundColor, onClickEvent=onClickEvent, \
+        border=border, txtColor=txtColor)
         self.targetScreen = targetScreen
         self.metaData = metaData
 
@@ -69,15 +71,20 @@ class MainMenuButton(Button):
     def onClick(self): # when the button gets clicked, execute the code
         if self.targetScreen == 'menu':
             # initialize the gameData every time we click on this button
-            self.metaData.gameData = self.metaData.emptyGameData(self.metaData, self.metaData.screen, self.metaData.song)
+            self.metaData.gameData = self.metaData.emptyGameData(self.metaData, \
+            self.metaData.screen, self.metaData.song)
         elif self.targetScreen in self.metaData.mainMenu.screens:
+            self.metaData.mainMenu.displaySongLoadNotice = False # re-initialze the song notice screen
+            
             self.metaData.mainMenu.currScreen = self.targetScreen 
         elif self.targetScreen == 'quit':
             sys.exit()
 
 class EndLevelButton(MainMenuButton):
-    def __init__(self, posx, posy, width, height, text, backGroundColor, targetScreen, metaData, onClickEvent=None, border=0, txtColor=None):
-        super().__init__(posx, posy, width, height, text, backGroundColor, targetScreen, metaData, onClickEvent=onClickEvent, border=border, txtColor=txtColor)
+    def __init__(self, posx, posy, width, height, text, backGroundColor, targetScreen, \
+    metaData, onClickEvent=None, border=0, txtColor=None):
+        super().__init__(posx, posy, width, height, text, backGroundColor, targetScreen, \
+        metaData, onClickEvent=onClickEvent, border=border, txtColor=txtColor)
 
     def onClick(self): # when the button gets clicked, execute the code
 
@@ -87,18 +94,35 @@ class EndLevelButton(MainMenuButton):
 
 # when the player clicks a startLevelButton, the game will load in the data for the new song
 class StartLevelButton(MainMenuButton):
-    def __init__(self, posx, posy, width, height, text, backGroundColor, targetScreen, metaData, onClickEvent=None, border=0, txtColor=None):
-        super().__init__(posx, posy, width, height, text, backGroundColor, targetScreen, metaData, onClickEvent=onClickEvent, border=border, txtColor=txtColor)
+    def __init__(self, posx, posy, width, height, text, backGroundColor, targetScreen, \
+    metaData, onClickEvent=None, border=0, txtColor=None, checkIfSongLoaded=True):
+        super().__init__(posx, posy, width, height, text, backGroundColor, targetScreen, \
+        metaData, onClickEvent=onClickEvent, border=border, txtColor=txtColor)
+        self.checkIfSongLoaded = checkIfSongLoaded
 
     def onClick(self): # when the button gets clicked, execute the code
-        print('startbuttonclicked')
+        print('Start Game')
         print(self.metaData.song)
         if self.targetScreen == 'game':
+            songName = SongSelectButton.getSongNameFromFilePath(self.metaData.song)
             # the start button only works if we have a song selected
+            print(self.metaData.song)
+            print('songData/' + songName + '.wav.txt')
             if os.path.isfile(self.metaData.song):
-                self.metaData.gameData = self.metaData.emptyGameData(self.metaData, self.metaData.screen, self.metaData.song)
-                # initialize the gameData every time we click on this button
-                self.metaData.currScreen = 'game'
+                if self.checkIfSongLoaded: # only check if the song is loaded if we want to
+                    if not os.path.isfile('songData/' + songName + '.wav.txt'):
+                        print('songData/' + songName + '.wav.txt')
+                        self.metaData.mainMenu.displaySongLoadNotice = True
+                    else:
+                        self.metaData.gameData = self.metaData.emptyGameData(self.metaData, \
+                        self.metaData.screen, self.metaData.song)
+                        # initialize the gameData every time we click on this button
+                        self.metaData.currScreen = 'game'
+                else:
+                    self.metaData.gameData = self.metaData.emptyGameData(self.metaData, \
+                    self.metaData.screen, self.metaData.song)
+                    # initialize the gameData every time we click on this button
+                    self.metaData.currScreen = 'game'
 
 # the song select buttons that are in the main menu
 class SongSelectButton(MainMenuButton):
@@ -109,8 +133,10 @@ class SongSelectButton(MainMenuButton):
         songName = songNameWithExtenstion.replace('.wav', '')
         return songName
 
-    def __init__(self, posx, posy, width, height, backGroundColor, metaData, songFilePath, onClickEvent=None, border=0, txtColor=None):
-        super().__init__(posx, posy, width, height, backGroundColor=backGroundColor, metaData=metaData, border=border, txtColor=txtColor)
+    def __init__(self, posx, posy, width, height, backGroundColor, metaData, songFilePath, \
+    onClickEvent=None, border=0, txtColor=None):
+        super().__init__(posx, posy, width, height, backGroundColor=backGroundColor, \
+        metaData=metaData, border=border, txtColor=txtColor)
         self.songFilePath = songFilePath
         self.songName = SongSelectButton.getSongNameFromFilePath(self.songFilePath)
         self.text = self.songName

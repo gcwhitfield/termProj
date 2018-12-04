@@ -68,6 +68,7 @@ class MainMenu:
         return buttonLst
 
     def __init__(self, metaData, screen):
+        # metaData and pygame 
         self.metaData = metaData
         self.screen = screen
         self.currScreen = 'mainMenu'
@@ -77,15 +78,24 @@ class MainMenu:
             'fileSelect',
             'play'
         )
+        # background color of menu
         self.backgroundColor = (0, 0, 0) # rgb values
+
+        # path to the beatDown logo
         self.beatDownImagePath = 'ImageAssets/beatdown.png'
         self.mainMenuButtonSpacing = 100
 
+        # if this variable is true, then we will display the notice that a song does not
+        # have frequency data loaded into the game.
+        self.displaySongLoadNotice = False
+
+        # song select buttons
         self.songSelectButtons = SongSelectButtonsGroup(
             self.metaData, 
             self.initButtons(), # the list of button filePaths
             100) # height of each button
         
+        # the buttns displayed on the main menu
         self.mainMenuButtons = set([
             MainMenuButton(self.metaData.width//2, self.metaData.height//2, # position
             100, 50, # size
@@ -113,6 +123,7 @@ class MainMenu:
             self.metaData,
             txtColor = Colors().WHITE) # exit the game if button clicked
         ]),
+        # buttons on the options screen
         self.optionsButtons = set([
             MainMenuButton(100, 100,
             100, 50,
@@ -122,6 +133,7 @@ class MainMenu:
             self.metaData,
             txtColor = Colors().WHITE),
         ]),
+        # buttons on the play screen
         self.playButtons = set([
             MainMenuButton(100, 100,
             100, 50,
@@ -137,7 +149,9 @@ class MainMenu:
             self.backgroundColor,
             'game',
             self.metaData,
-            txtColor = Colors().WHITE),
+            txtColor = Colors().WHITE,
+            checkIfSongLoaded=True),
+            
         ]),
 
     def drawBackGround(self, screen):
@@ -160,9 +174,80 @@ class MainMenu:
         for tup in self.optionsButtons:
             for button in tup:
                 button.draw(screen)
-            
+
+    def drawSongLoadNotice(self, screen):
+        # draw black background
+        backGroundColor = (0, 0, 0) 
+        backGroundRect = pygame.Rect(0, 
+                                  0, 
+                                  self.metaData.width, 
+                                  self.metaData.height)
+        pygame.draw.rect(screen, backGroundColor, backGroundRect, 0)
+
+        # draw the text
+        fontSize = 40
+        fontColor = Colors().WHITE
+        textx = self.metaData.width//2
+        texty = 100
+        text = '''\
+You have selected a song that is
+currently not loaded into BeatDown.
+
+If you click "Okay", BeatDown will
+process the selected song, save it
+to a file, and then run the game. Saving
+the song to a file can take up to
+five minutes dependin on the length
+of the song.
+
+You only need to process the song once.
+'''
+        lineCount = 0
+        for line in text.splitlines():
+            lineCount += 1 # loop through the lines of our message and display them
+            txtData = pygame.font.SysFont(None,
+                                    fontSize) # font size
+            # i learned the logic for displaying texts in pygame from this wordpress
+            # website
+            # https://sivasantosh.wordpress.com/2012/07/18/displaying-text-in-pygame/
+            lineText = txtData.render(line, True, fontColor, backGroundColor)
+            rect = lineText.get_rect()
+            rect.centerx = textx
+            rect.centery = texty + fontSize * lineCount
+            screen.blit(lineText, rect)
+
+        # create the "Okay" button
+        okayButton = StartLevelButton(
+            self.metaData.width//4, # position x
+            self.metaData.height - 100, # position y
+            100, # width
+            50, # height
+            'Okay', # text
+            Colors().BLACK, # background color
+            'game', # target screen
+            self.metaData,
+            txtColor = Colors().WHITE,
+            checkIfSongLoaded=False)
+        okayButton.draw(screen) # draw the button
+        if okayButton.isClicked(pygame.mouse.get_pos()): # if the button is clicked
+            okayButton.onClick() # execute click behavior
+        
+        # create the "Nope" button
+        nopeButton = MainMenuButton((self.metaData.width//4) * 3, self.metaData.height - 100, # position
+            100, 50, # size (width, height)
+            'Nope', # display text
+            self.backgroundColor,
+            'play',
+            self.metaData,
+            txtColor = Colors().WHITE)
+        nopeButton.draw(screen)
+        if nopeButton.isClicked(pygame.mouse.get_pos()): # if the button is clicked
+            nopeButton.onClick() # execute click behavior
     def drawFileSelect(self, screen):
-        pass
+        self.drawSongSelectButtons(screen)
+        # if the song display notice is true, then display the notice
+        if self.displaySongLoadNotice:
+            self.drawSongLoadNotice(screen)
 
     def drawSongSelectButtons(self, screen):
         self.songSelectButtons.draw(screen)
@@ -171,8 +256,8 @@ class MainMenu:
         for tup in self.playButtons:
             for button in tup:
                 button.draw(screen)
-
-        self.drawSongSelectButtons(screen)
+        self.drawFileSelect(screen)
+    
     def draw(self, screen):
         self.drawBackGround(screen)
         if self.currScreen == 'mainMenu':
