@@ -23,15 +23,15 @@ class SongData:
 class GameData:
     def __init__(self, metaData, screen, song):
         self.currScreen = 'game' # screen is either game or endLevel
-        self.colors = Colors()
+        #self.colors = Colors()
         self.metaData = metaData
         self.initialized = True
         self.chunkSize = self.metaData.chunkSize # 1/60 of a second
         self.gameTime = -1
-        self.screen = screen
-        self.song = song
+        self.screen = screen # pygame screen
+        self.song = song # song we are currently playing
         self.songObject = WavFile(self.song, self.chunkSize)
-        self.currentBeat = 0
+        self.currentBeat = 0 
         self.isPaused = False
         self.pauseScreen = 0
         self.backgroundColor = (0, 0, 0)
@@ -45,6 +45,8 @@ class GameData:
         self.enemies = set() 
         self.enemiesToRemove = set()
         self.bulletsToAdd = set()
+        self.currEnemy = BoxEnemy # which enemy we are currently spawning
+        self.enemySpawnModifier = 1 # controls how often the enemies spawn
 
         # coins data
         self.coins = set()
@@ -53,7 +55,7 @@ class GameData:
         self.score = 0
         self.maxScore = 0
         self.COIN_DRAW_LOCK = False # make sure we don't draw to draw and remove coins at the same time
-        
+
         # decorations data
         self.numDecs = 200
         self.decorations = set()
@@ -78,9 +80,16 @@ class GameData:
         # the number of samples in one intensity interval
         self.intensityInterval = self.songObject.sampleRate * self.lengthOfIntensityIntervalInSeconds 
         self.numAnimationFramesPerIntenInterval = 300
-        self.intensityData = self.songObject.calcIntensityForWholeSong(self.intensityInterval)
+        self.intensityData = self.songObject.calcIntensityForWholeSong(self.intensityInterval, self.songObject.lenInSamples)
         self.currIntensityInterval = 0
-        
+
+        # colors data
+        self.colors = Colors()
+        self.intensityColors = self.colors.calculateColorsForIntensityIntervals(self.intensityData)
+        self.currMainColor = self.intensityColors[self.currIntensityInterval] # color for current interval
+        self.colorLerp = 0 # update this every animatin frame and set back to zero every intensity interval
+        self.instantColor = self.colors.calculateCurrentColor(self)
+        print(self.intensityColors)
         # enemy data
         # a lower enemy spawn frequency corresponds to a HIGHER spawn rate
         self.enemySpawnFrequency = 60 # spawn every second
@@ -211,10 +220,12 @@ class GameData:
         currIntensity = self.intensityData[self.currIntensityInterval]
         enemy = 0
         if 0.7 < currIntensity < 1: # high intensity
-            enemy = PlusSignShootyEnemy(self.metaData)
+            enemy = BoxEnemy(self.metaData)
         elif 0.5 < currIntensity < 0.7: # medium intensity
             enemy = BoxEnemy(self.metaData)
         elif currIntensity < 0.5: # low intensity
+            enemy = BoxEnemy(self.metaData)
+        else:
             enemy = BoxEnemy(self.metaData)
         
         self.enemies.add(enemy)
@@ -234,6 +245,11 @@ class GameData:
                 self.score -= 2
                 self.enemiesToRemove.add(enemy)
         self.ENEMY_DRAW_LOCK = False
+
+    def intensityIntervalFired(self):
+        self.currIntensityInterval += 1 # go to the next intensity interval
+        self.currMainColor = self.intensityColors[self.currIntensityInterval]
+        self.colorLerp = 0
 
     # remove all of the dead enemies
     def removeDeadEnemies(self):
@@ -336,6 +352,12 @@ class GameData:
             else:
                 self.nonBeatFired()
 
-            # run every 5 seconds
+            # run every new intensity interval
             if (self.gameTime % self.numAnimationFramesPerIntenInterval) == 0: # update the intensity data 
-                self.currIntensityInterval += 1
+                self.intensityIntervalFired()
+
+            # update the color lerp
+            self.colorLerp += 1
+            # update instantanoues Color
+            self.instantColor = self.colors.calculateCurrentColor(self)
+            print(self.instantColor)

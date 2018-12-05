@@ -13,7 +13,7 @@ class EnemySpawnData:
         # adjust how often the enemies spawn during the game
         self.BoxEnemyRate = 1
         self.ShootySpinnyEnemyRate = 0.25
-        self.PlusSignShootyEnemyRate = 0.25
+        self.PlusSignShootyEnemyRate = 0.2
 
 # basic enemy class
 class Enemy:
@@ -48,13 +48,17 @@ class BoxEnemy(Enemy):
     def __init__(self, metaData, size=None, speed=None):
         super().__init__(metaData, size=size, speed=speed)
         self.rect = pygame.Rect(self.posx, self.posy, self.size, self.size)
-        self.color = colors.Colors().RED
+        self.colorOffset = (0, 10, 0)
+        self.color = colors.Colors().addTwoColors(self.metaData.gameData.instantColor, self.colorOffset)
         self.minSize = self.size
         self.maxSize = self.minSize * 1.5
         self.growFactor = 1
 
     # draw box
     def draw(self):
+        # update the color
+        self.color = colors.Colors().addTwoColors(self.metaData.gameData.instantColor, self.colorOffset)
+        # draw the box
         pygame.draw.rect(self.metaData.screen, self.color, self.rect, 0)
     
     # shrink the box when we aren't on the beat
@@ -105,7 +109,7 @@ class ShootySpinnyEnemy(Enemy):
         self.gunDistanceFromCenter = self.size // 2
         self.gunSize = self.size // 4
 
-    # data about the gun position
+    # the gun position
     def getGunData(self):
         posx = self.gunDistanceFromCenter * math.cos(math.radians(self.currRotation))
         posy = self.gunDistanceFromCenter * math.sin(math.radians(self.currRotation))
@@ -251,7 +255,7 @@ class Bullet(Enemy):
         super().__init__(metaData)
         self.posx = posx
         self.posy = posy
-        self.speed = 1
+        self.speed = 3
         self.rotation = rotation
         self.size = size
         self.color = (0, 200, 200)

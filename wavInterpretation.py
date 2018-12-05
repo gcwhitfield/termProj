@@ -238,11 +238,11 @@ class WavFile(object):
 
     #calc intensity for the whole song
     # the interval is a length in samples that we want to get data about :)
-    def calcIntensityForWholeSong(self, interval):
+    def calcIntensityForWholeSong(self, interval, lenInSamples):
         result = []
         numChunks = self.lenInSamples // (self.chunkSize * 2)
         intervalLenInChunks = numChunks // (self.lenInSamples // interval)
-        for i in range(numChunks):
+        for i in range(lenInSamples//interval):
             beginning = intervalLenInChunks * i
             end = intervalLenInChunks * (i + 1)
             if end > self.lenInSamples:
