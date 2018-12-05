@@ -110,20 +110,21 @@ class GameData:
 
     # display the cool audio spectrum in the background
     def displayAudioSpectrumBackground(self, screen):
-        rectBorder = 5
+        rectBorder = 7
         currSpectrum = self.musicSpectrums[self.gameTime]
         gameWidth = self.metaData.width
-        gameHeight = self.metaData.height
+        specHeightModifier = 0.001
         rectWidth = gameWidth / len(currSpectrum)
         posy = 0
-        
+        colorOffset = (-100, -100, -100,) # edit this to change color of spectrum
+        spectrumColor = self.colors.addTwoColors(self.instantColor, colorOffset)
         for index in range(len(currSpectrum)):
             dataPoint = currSpectrum[index]
-            height = dataPoint//100
+            height = dataPoint * specHeightModifier
             rect = pygame.Rect
             posx = index * rectWidth
             rect = pygame.Rect(posx, posy, rectWidth - rectBorder, height)
-            pygame.draw.rect(screen, (100, 0, 100), rect, 0)
+            pygame.draw.rect(screen, spectrumColor, rect, 0)
 
     # fire when the mouse is clicked
     def mouseClicked(self, mousePos, buttons): # check if clicked on button
@@ -222,11 +223,11 @@ class GameData:
         if 0.7 < currIntensity < 1: # high intensity
             enemy = BoxEnemy(self.metaData)
         elif 0.5 < currIntensity < 0.7: # medium intensity
-            enemy = BoxEnemy(self.metaData)
+            enemy = NoodleEnemy(self.metaData)
         elif currIntensity < 0.5: # low intensity
-            enemy = BoxEnemy(self.metaData)
+            enemy = NoodleEnemy(self.metaData)
         else:
-            enemy = BoxEnemy(self.metaData)
+            enemy = NoodleEnemy(self.metaData)
         
         self.enemies.add(enemy)
 
@@ -247,7 +248,8 @@ class GameData:
         self.ENEMY_DRAW_LOCK = False
 
     def intensityIntervalFired(self):
-        self.currIntensityInterval += 1 # go to the next intensity interval
+        if self.currIntensityInterval < len(self.intensityColors) - 2:
+            self.currIntensityInterval += 1 # go to the next intensity interval
         self.currMainColor = self.intensityColors[self.currIntensityInterval]
         self.colorLerp = 0
 

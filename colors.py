@@ -15,7 +15,7 @@ class Colors:
         minRGB = 0
         maxRGB = 255
         for i in range(len(c1)):
-            result.append(clamp(c1[i] - c2[i], minRGB, maxRGB)) # add new color value
+            result.append(clamp(c1[i] + c2[i], minRGB, maxRGB)) # add new color value
         return result
 
     

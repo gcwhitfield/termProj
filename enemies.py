@@ -24,7 +24,7 @@ class Enemy:
             self.size = size
 
         if speed == None:
-            self.speed = random.randint(1, 2) # random speed if none
+            self.speed = random.randint(1, 4) # random speed if none
         else:
             self.speed = speed
         self.metaData = metaData
@@ -90,12 +90,54 @@ class BoxEnemy(Enemy):
     # return true if the box is colliding with the player
     def isCollidingWithPlayer(self):
         player = self.metaData.gameData.player
-        return player.posx < (self.posx + self.size) < player.posx + player.size * 2 and \
-               player.posy < (self.posy + self.size) < player.posy + player.size * 2
+        return self.rect.colliderect(player.rect)
 
-class NoodleEnemy(Enemy):
+class NoodleEnemy(BoxEnemy):
     def __init__(self, metaData, size=None, speed=None):
         super().__init__(metaData, size=size, speed=speed)
+        self.size = self.size//2 # make the noodle skinnier
+        self.length = self.size * 4 # length of the noodle
+        self.rect = pygame.Rect(self.posx, self.posy, self.size, self.length)
+        self.colorOffset = (0, 0, 10)
+        self.maxLength = self.length * 2
+        self.minLength = self.length 
+        self.growthRate = 2
+
+    # draw box
+    def draw(self):
+        # update the color
+        self.color = colors.Colors().addTwoColors(self.metaData.gameData.instantColor, self.colorOffset)
+        # draw the box
+        self.rect = pygame.Rect(self.posx, self.posy, self.size, self.length)
+        self.rect.centerx = self.posx
+        self.rect.centery = self.posy
+        pygame.draw.rect(self.metaData.screen, self.color, self.rect, 0)
+    
+    def move(self):
+        self.posx -= self.speed
+        self.shrink()
+    
+    def grow(self):
+        if self.length < self.maxLength:
+            self.length += self.growthRate
+        
+    def shrink(self):
+        if self.length > self.minLength:
+            self.length -= self.growthRate * 1.2
+
+    def beatMove(self):
+        self.posx -= self.speed
+        self.grow()
+
+    def isCollidingWithPlayer(self):
+        player = self.metaData.gameData.player
+        return self.rect.colliderect(player.rect)
+        '''
+        return player.posx < self.posx + self.size//2 and \
+        player.posx + player.size > self.posx - self.size//2 and \
+        player.posy > self.posy + self.length//2 and \
+        player.posy + player.size < self.posy + self.length//2
+        '''
 
 # enemy that spins in a circle and shoots bullets
 class ShootySpinnyEnemy(Enemy):

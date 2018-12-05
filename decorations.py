@@ -17,15 +17,17 @@ class Decoration:
         self.rotation = random.randint(0, 360) # angle in degrees
         self.speedx = math.cos(math.degrees(self.rotation))
         self.speedy = math.sin(math.degrees(self.rotation))
+        self.moveLeftSpeed = 0.5
 
     def move(self):
         self.posx -= self.speedx * 0.1
         self.posy -= self.speedy * 0.1
+        self.posx -= self.moveLeftSpeed * 0.2
     
     def beatMove(self):
         self.posx -= self.speedx * 1.2
         self.posy -= self.speedy * 1.2
-
+        self.posx -= self.moveLeftSpeed 
 # sparkles in the background
 class Sparkle(Decoration):
     def __init__(self, metaData):
