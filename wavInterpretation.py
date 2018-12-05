@@ -251,6 +251,11 @@ class WavFile(object):
                 break
             result.append(self.calculateIntensity(self.lowMidHighData[beginning:end], self.loudnessPerChunk[beginning:end], interval))
         # normalize all of the intensity values to be between 0 and 1
+        # learned how to take the average of a list on stack overflow 
+        #https://stackoverflow.com/questions/9039961/finding-the-average-of-a-list
+        instensityAverage = sum(result)/len(result)
+
         for i in range(len(result)):
-            result[i] /= max(result)
+            # get relative intensity
+            result[i] /= instensityAverage
         return result

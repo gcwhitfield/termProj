@@ -42,7 +42,6 @@ class Colors:
         result = []
         # decide which color to add
         for intenVal in intensity:
-            print(intenVal)
             if 0.9 < intenVal:
                 result.append(veryHighColor)
             elif 0.8 < intenVal < 0.9:
@@ -75,7 +74,6 @@ class Colors:
             for i in range(3): # we want co calculate the r, g, and b values so we loop three times
                 distanceBetweenColors = nextColor[i] - currColor[i]
                 step = distanceBetweenColors / numAnimationFramesPerIntenInterval
-                print('STEP   ' + str(step))
                 colorVal = (colorLerp * step) + currColor[i]
                 result.append(int(colorVal)) # append the r, g, and b values to the list
             return tuple(result)

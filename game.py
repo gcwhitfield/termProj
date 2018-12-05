@@ -244,7 +244,7 @@ class GameData:
             enemy.draw()
             if enemy.isCollidingWithPlayer():
                 self.score -= 2
-                self.enemiesToRemove.add(enemy)
+                #self.enemiesToRemove.add(enemy)
         self.ENEMY_DRAW_LOCK = False
 
     def intensityIntervalFired(self):
@@ -252,6 +252,7 @@ class GameData:
             self.currIntensityInterval += 1 # go to the next intensity interval
         self.currMainColor = self.intensityColors[self.currIntensityInterval]
         self.colorLerp = 0
+        print(self.intensityData[self.currIntensityInterval])
 
     # remove all of the dead enemies
     def removeDeadEnemies(self):
@@ -362,4 +363,3 @@ class GameData:
             self.colorLerp += 1
             # update instantanoues Color
             self.instantColor = self.colors.calculateCurrentColor(self)
-            print(self.instantColor)

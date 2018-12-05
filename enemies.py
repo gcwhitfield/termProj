@@ -14,7 +14,7 @@ class EnemySpawnData:
         self.BoxEnemyRate = 1
         self.ShootySpinnyEnemyRate = 0.25
         self.PlusSignShootyEnemyRate = 0.2
-
+        self.NoodleEnemyRate = 1
 # basic enemy class
 class Enemy:
     def __init__(self, metaData, size = None, speed = None):
@@ -139,6 +139,87 @@ class NoodleEnemy(BoxEnemy):
         player.posy + player.size < self.posy + self.length//2
         '''
 
+class NoodleEnemyTunnel(Enemy):
+    def initializeNoodleTunnel(self, yOffset):
+        result = []
+        for i in range(self.numNoodles):
+            # space the noodle equally
+            enemPosX = self.posx + ((self.noodleWidth + self.noodleBorder) * i) 
+            # calculate the y position of the noodle 
+            enemPosY = (math.sin(math.radians((360 / self.noodlesPerWavePeriod) * i)) * self.waveAmplitude) \
+            + yOffset
+            
+            enemy = NoodleEnemy(self.metaData, size=self.noodleWidth) # make a new noodle
+            enemy.posx = enemPosX
+            enemy.posy = enemPosY
+            result.append(enemy)
+        return result
+
+    def __init__(self, metaData, size=None, speed=None):
+        super().__init__(metaData, size=size, speed=speed)
+        self.tunnelWidth = 300 # width of the tunnel
+        self.numNoodles = 100
+        self.noodleWidth = 20
+        self.noodleBorder = 5
+        self.noodlesPerWavePeriod = 100
+        self.waveAmplitude = 30
+
+        self.upperNoodles = self.initializeNoodleTunnel(0) # y offset is 0
+        self.lowerNoodles = self.initializeNoodleTunnel(self.tunnelWidth) # y offset is tunnelWidth
+
+        self.waveAlong = 0 # number to offset wave amount by every time we move noodles
+        self.waveSpeed = 1
+
+    def noodleCrawl(self, noodls, lowerNoodles = False):
+        for i in range(len(noodls)):
+            noodls[i].posy = (math.sin(math.radians((360 / self.noodlesPerWavePeriod) * i) + self.waveAlong)  \
+            * self.waveAmplitude) + (self.tunnelWidth * lowerNoodles)
+    
+    # moves the noodles in a wave motiion
+    def waveTheNoodles(self):
+        self.noodleCrawl(self.upperNoodles)
+        self.noodleCraw(self.lowerNoodles, lowerNoodles = True)
+
+    # shrinks all of the noodles
+    def shrinkNoodles(self):
+        for noodl in self.upperNoodles:
+            noodl.shrink()
+        for noodl in self.lowerNoodles:
+            noodl.shrink()
+        
+    # grow all of the noodles
+    def growNoodles(self):
+        for noodl in self.upperNoodles:
+            noodl.grow()
+        for noodl in self.lowerNoodles:
+            noodl.grow()
+
+    # move when off of the beat
+    def move(self): # move the tunnel
+        self.posx -= self.speed
+        self.waveTheNoodles()
+        self.shrinkNoodles()
+
+    # move when on the beat
+    def beatMove(self):
+        self.posx -= self.speed
+        self.waveTHeNoodles()
+        self.growNoodles()
+
+    def draw(self):
+        for noodl in self.upperNoodles:
+            noodl.draw()
+        for noodl in self.lowerNoodles:
+            noodl.draw()
+
+    def isCollidingWithPlayer(self):
+        for noodl in self.upperNoodles:
+            if noodl.isCollidingWithPlayer():
+                return True
+        for noodl in self.lowerNoodles:
+            if noodl.isCollidingWithPlayer():
+                return True
+        return False
 # enemy that spins in a circle and shoots bullets
 class ShootySpinnyEnemy(Enemy):
     def __init__(self, metaData, size=None, speed=None):
