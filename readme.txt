@@ -13,7 +13,7 @@ HOW TO INSTALL THE PROJECT
 
 Clone this repository using github: git@github.com:gcwhitfield/termProj.git
 
-Note* Make sure you are running the most recent commit on the ‘main’ branch.
+Note* Make sure you are running the most recent commit on the ‘DEVELOP’ branch.
 
 You need two outside libraries to run BeatDown:
 PyAudio
