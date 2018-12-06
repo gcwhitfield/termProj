@@ -223,8 +223,8 @@ currently not loaded into BeatDown.
 If you click "Okay", BeatDown will
 process the selected song, save it
 to a file, and then run the game. Saving
-the song to a file can take up to
-five minutes dependin on the length
+the song to a file can take around
+ten minutes depending on the length
 of the song.
 
 You only need to process the song once.
