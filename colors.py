@@ -44,18 +44,17 @@ class Colors:
         for intenVal in intensity:
             if 0.9 < intenVal:
                 result.append(veryHighColor)
-            elif 0.8 < intenVal < 0.9:
+            elif 0.4 < intenVal < 0.9:
                 result.append(lowHighColor)
-            elif 0.75 < intenVal < 0.8:
+            elif -0.4 < intenVal < 0.4:
                 result.append(mediumHighColor)
-            elif 0.5 < intenVal < 0.75:
+            elif -0.6 < intenVal < -0.3:
                 result.append(mediumLowColor)
-            elif 0.3 < intenVal < 0.5:
+            elif -0.9 < intenVal < -0.6:
                 result.append(lowHighColor)
-            elif 0 < intenVal < 0.3:
-                result.append(veryLowColor)
             else:
-                result.append(mediumHighColor)
+                result.append(veryLowColor)
+
         # return the list of colors
         return result
 

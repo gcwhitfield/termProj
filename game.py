@@ -212,16 +212,17 @@ class GameData:
         self.moveEnemies()
         self.moveDecorations()
 
+    # change how often enemies spawn based on the current intensity and the game difficulty
     def spawnEnemiesBasedOnInensity(self):
         inten = self.intensityData[self.currIntensityInterval]
         if inten < -1:
-            self.enemySpawnFrequency = 1000
+            self.enemySpawnFrequency = int(500 * self.metaData.gameDifficulty)
         elif inten < -0.5:
-            self.enemySpawnFrequency = 700
+            self.enemySpawnFrequency = int(300 * self.metaData.gameDifficulty)
         elif inten < 0.5:
-            self.enemySpawnFrequency = 300
+            self.enemySpawnFrequency = int(150 * self.metaData.gameDifficulty)
         else:
-            self.enemySpawnFrequency = 100
+            self.enemySpawnFrequency = int(50 * self.metaData.gameDifficulty)
     
     # add the current enemy the game 
     def addEnemy(self):
@@ -251,9 +252,9 @@ class GameData:
         elif 0.5 < currIntensity < 1: # medium intensity
             self.currEnemy = random.choice([ShootySpinnyEnemy, BoxEnemy, NoodleEnemy])
         elif -0.5 < currIntensity < 0.5: # low intensity
-            self.currEnemy = random.choice([BoxEnemy, NoodleEnemy])
+            self.currEnemy = random.choice([BoxEnemy, NoodleEnemy, HomingSquare])
         else: # very low intensity
-            self.currEnemy = NoodleEnemyTunnel
+            self.currEnemy = random.choice([NoodleEnemyTunnel, HomingSquare])
 
     def intensityIntervalFired(self):
         if self.currIntensityInterval < len(self.intensityColors) - 2:
@@ -262,6 +263,7 @@ class GameData:
         self.colorLerp = 0
         self.chooseNewEnemy()
         print(self.intensityData[self.currIntensityInterval])
+        self.spawnEnemiesBasedOnInensity()
 
     # remove all of the dead enemies
     def removeDeadEnemies(self):

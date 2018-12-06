@@ -224,3 +224,40 @@ class SongPageScrollButton(Button):
         print(self.metaData.mainMenu.songSelectButtons.currentScreen)
         print(self.metaData.mainMenu.songSelectButtons.numberOfScreens)
         print(self.metaData.mainMenu.songSelectButtons.buttonsPerScreen)
+
+class ChangeDifficultyButton(Button):
+    def __init__(self, posx, posy, width, height, metaData, targDifficulty=1, text=None, backGroundColor=(...), onClickEvent=None, border=0, txtColor=None):
+        super().__init__(posx, posy, width, height, text=text, backGroundColor=backGroundColor, onClickEvent=onClickEvent, border=border, txtColor=txtColor)
+        self.targDifficulty = targDifficulty
+        self.metaData = metaData
+
+
+    def isClicked(self, mousePosition):
+        # mouse position is an (x, y) tuple
+        x, y = mousePosition
+        if self.posx - self.width//2 < x and self.posx + self.width//2 > x and \
+        self.posy - self.height//2 < y and self.posy + self.height//2 > y:
+            self.onClick()
+
+    def getTxtColor(self):
+        if self.metaData.gameDifficulty == self.targDifficulty:
+            self.txtColor = colors.Colors().GREEN
+        else:
+            self.txtColor = colors.Colors().WHITE
+
+    def draw(self, screen):
+        pygame.font.init()
+        txtData = pygame.font.SysFont(None,
+                                self.height) # font size
+        # i learned the logic for displaying texts in pygame from this wordpress
+        # website
+        # https://sivasantosh.wordpress.com/2012/07/18/displaying-text-in-pygame/
+        self.getTxtColor()
+        text = txtData.render(self.text, True, self.txtColor, self.backGroundColor)
+        rect = text.get_rect()
+        rect.centerx = self.posx
+        rect.centery = self.posy
+        screen.blit(text, rect)
+    
+    def onClick(self): # when the button gets clicked, execute the code
+        self.metaData.gameDifficulty = self.targDifficulty

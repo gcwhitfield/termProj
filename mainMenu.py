@@ -105,17 +105,9 @@ class MainMenu:
             self.metaData, # MainMenu
             txtColor = Colors().WHITE), # text color
 
-            MainMenuButton(self.metaData.width//2,
-            self.metaData.height//2 + self.mainMenuButtonSpacing,
-            100, 50,
-            'OPTIONS',
-            self.backgroundColor,
-            'options',
-            self.metaData,
-            txtColor = Colors().WHITE),
 
             MainMenuButton(self.metaData.width//2,
-            self.metaData.height//2 + 2*self.mainMenuButtonSpacing,
+            self.metaData.height//2 + self.mainMenuButtonSpacing,
             100, 50,
             'QUIT',
             self.backgroundColor,
@@ -143,7 +135,7 @@ class MainMenu:
             self.metaData,
             txtColor = Colors().WHITE),
 
-            StartLevelButton(self.metaData.width//2, 50,
+            StartLevelButton(self.metaData.width//3, 50,
             100, 50,
             'START',
             self.backgroundColor,
@@ -160,7 +152,33 @@ class MainMenu:
             SongPageScrollButton(50, self.metaData.height - 50,
             100, 100,
             self.metaData,
-            direction=-1)
+            direction=-1),
+
+            ChangeDifficultyButton(self.metaData.width//2, 30,
+            100, 30,
+            self.metaData,
+            targDifficulty=3,
+            text='CASUAL'),
+
+            ChangeDifficultyButton(self.metaData.width//2 + 100, 30,
+            100, 30,
+            self.metaData,
+            targDifficulty=2,
+            text='MEDIUM'),
+
+            ChangeDifficultyButton(self.metaData.width//2 + 220, 30,
+            100, 30,
+            self.metaData,
+            targDifficulty=1,
+            text='HARD'),
+
+            ChangeDifficultyButton(self.metaData.width//2 + 370, 30,
+            100, 30,
+            self.metaData,
+            targDifficulty=0.2,
+            text='IMPOSSIBLE'),
+
+
         ]),
 
     def drawBackGround(self, screen):

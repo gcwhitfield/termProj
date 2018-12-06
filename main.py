@@ -43,6 +43,7 @@ class MetaData:
         self.mainMenu = mainMenu.MainMenu(self, self.screen)
 
         self.emptyGameData = game.GameData
+        self.gameDifficulty = 1 # normal difficulty
         # we need to define the gameData only when we have an acceptable file path
         if os.path.isfile(self.song):
             self.gameData = game.GameData(self, self.screen, self.song)

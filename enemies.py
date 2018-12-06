@@ -95,6 +95,31 @@ class BoxEnemy(Enemy):
         player = self.metaData.gameData.player
         return self.rect.colliderect(player.rect)
 
+class HomingSquare(BoxEnemy):
+    def __init__(self, metaData, size=None, speed=None):
+        super().__init__(metaData, size=size, speed=speed)
+
+    def moveUpDown(self):
+        if self.metaData.gameData.player.posy > self.posy:
+            self.posy += self.speed//4
+        else:
+            self.posy -= self.speed//4
+
+    def move(self): # move normally
+        self.posx -= self.speed * 0.25
+        self.moveUpDown()
+        self.rect = pygame.Rect(self.posx, self.posy, self.size, self.size)
+        # also handle grow and shrink behavior
+        super().shrink()
+    
+    def beatMove(self): # move extra on the beat
+        self.posx -= self.speed * 1.5
+        self.moveUpDown()
+
+        super().grow()
+        self.rect = pygame.Rect(self.posx, self.posy, self.size, self.size)
+
+
 class NoodleEnemy(BoxEnemy):
     def __init__(self, metaData, size=None, speed=None):
         super().__init__(metaData, size=size, speed=speed)
@@ -156,14 +181,14 @@ class NoodleEnemyTunnel(Enemy):
 
     def __init__(self, metaData, size=None, speed=None):
         super().__init__(metaData, size=size, speed=speed)
-        self.speed = 2
-        self.spawnRate = .05
+        self.speed = random.randint(2, 4)
+        self.spawnRate = .2
         self.tunnelWidth = 300 # width of the tunnel
         self.posy = random.randint(0, self.metaData.height - self.tunnelWidth)
-        self.numNoodles = 100
+        self.numNoodles = random.randint(100, 300)
         self.noodleWidth = 20
         self.noodleBorder = 5
-        self.noodlesPerWavePeriod = 100
+        self.noodlesPerWavePeriod = random.randint(100, 200)
         self.waveAmplitude = random.randint(100, 300)
         self.totalLength = self.numNoodles * (self.noodleWidth + self.noodleBorder)
 
