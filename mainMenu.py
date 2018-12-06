@@ -3,7 +3,7 @@
 # The data and logic for the main menu
 
 import sys
-from button import MainMenuButton, StartLevelButton, SongSelectButton
+from button import *
 from colors import Colors
 import pygame
 import os
@@ -29,7 +29,7 @@ class SongSelectButtonsGroup:
         self.buttonObjects = self.createButtonObjectsFromFilePaths()
         self.buttonsPerScreen = ((self.metaData.height - 200) // self.buttonHeight)
         self.currentScreen = 0
-        self.numberOfScreens = len(self.buttonObjects) // self.buttonsPerScreen
+        self.numberOfScreens = (len(self.buttonObjects) // self.buttonsPerScreen) + 1
 
     # handle song selection button mouse cick
     def mouseClicked(self, mousePos, buttonsOnScreen):
@@ -41,9 +41,9 @@ class SongSelectButtonsGroup:
     # I'm violating the principles of model, view, controller so that I can easily check clicks
     def draw(self, screen):
         buttonsOnScreen = set()
-        leftMarginWidth = 100
+        leftMarginWidth = 150
         for i in range(self.buttonsPerScreen):
-            buttonIndex = i + (self.numberOfScreens * self.currentScreen)
+            buttonIndex = i + (self.buttonsPerScreen * self.currentScreen)
             if buttonIndex < len(self.buttonObjects):
                 currButton = self.buttonObjects[buttonIndex]
                 currButton.posy = 200 + (i * self.buttonHeight)
@@ -125,7 +125,7 @@ class MainMenu:
         ]),
         # buttons on the options screen
         self.optionsButtons = set([
-            MainMenuButton(100, 100,
+            MainMenuButton(50, 50,
             100, 50,
             'BACK',
             self.backgroundColor,
@@ -135,7 +135,7 @@ class MainMenu:
         ]),
         # buttons on the play screen
         self.playButtons = set([
-            MainMenuButton(100, 100,
+            MainMenuButton(50, 50,
             100, 50,
             'BACK',
             self.backgroundColor,
@@ -143,7 +143,7 @@ class MainMenu:
             self.metaData,
             txtColor = Colors().WHITE),
 
-            StartLevelButton(self.metaData.width//2, 100,
+            StartLevelButton(self.metaData.width//2, 50,
             100, 50,
             'START',
             self.backgroundColor,
@@ -151,7 +151,16 @@ class MainMenu:
             self.metaData,
             txtColor = Colors().WHITE,
             checkIfSongLoaded=True),
+
+            SongPageScrollButton(50, 150,
+            100, 100,
+            self.metaData,
+            direction=1),
             
+            SongPageScrollButton(50, self.metaData.height - 50,
+            100, 100,
+            self.metaData,
+            direction=-1)
         ]),
 
     def drawBackGround(self, screen):
@@ -243,6 +252,7 @@ You only need to process the song once.
         nopeButton.draw(screen)
         if nopeButton.isClicked(pygame.mouse.get_pos()): # if the button is clicked
             nopeButton.onClick() # execute click behavior
+
     def drawFileSelect(self, screen):
         self.drawSongSelectButtons(screen)
         # if the song display notice is true, then display the notice

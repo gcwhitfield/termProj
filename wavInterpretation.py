@@ -250,12 +250,25 @@ class WavFile(object):
                 result.append(self.calculateIntensity(self.lowMidHighData[beginning:end], self.loudnessPerChunk[beginning:end], interval))
                 break
             result.append(self.calculateIntensity(self.lowMidHighData[beginning:end], self.loudnessPerChunk[beginning:end], interval))
-        # normalize all of the intensity values to be between 0 and 1
+        # normalize all of the intensity values to be between 0 and 1 using the formula for standard deviation
         # learned how to take the average of a list on stack overflow 
         #https://stackoverflow.com/questions/9039961/finding-the-average-of-a-list
         instensityAverage = sum(result)/len(result)
-
+        intensityStandardDeviation = standardDeviation(result)
+        
+        # normalize values according to standard deviation
         for i in range(len(result)):
             # get relative intensity
-            result[i] /= instensityAverage
+            result[i] = (result[i] - instensityAverage) / intensityStandardDeviation
+        
         return result
+
+# calculate the standard deviation of a list
+def standardDeviation(lst):
+    lstAv = sum(lst)/len(lst)
+    weightedAv = 0
+    for item in lst:
+        weightedAv += (item - lstAv) ** 2
+    weightedAv /= len(lst)
+    stanDev = weightedAv ** 0.5
+    return stanDev

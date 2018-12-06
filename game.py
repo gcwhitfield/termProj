@@ -2,23 +2,25 @@
 # 15-112 Term Project 2018
 # This file runs the 'game' mode where the user listens to the song and plays the level
 
+# The TimerFired function at the beginning of the file will get called every 1/60th of
+# a second by the music thread. 
+
+# The runGame function at the top of the GameData class will get called every pygame
+# animation frame by the main.py file.
+
+
 import pygame
 import wave
 from wavInterpretation import WavFile
 import threading
 import threadPlayAudio
 import threading
+import random
 from enemies import *
 from decorations import *
 from player import Player
 from button import EndLevelButton
 from colors import Colors
-
-class SongData:
-    def __init__(self, metaData):
-        self.metaData = metaData
-        self.chunkTimer = 0
-        self.chunkCount = 0
 
 class GameData:
     def __init__(self, metaData, screen, song):
@@ -135,13 +137,18 @@ class GameData:
     # draw the stuff on the game screen
     def drawGameScreen(self, screen):
         if self.currScreen == 'game':
+            # make the background
             self.drawBackground(screen)
             
+            # draw the decorations
             self.displayAudioSpectrumBackground(screen)
             self.decorationBehavior()
+
+            # draw coins and enemies
             self.coinBehavior()
             self.enemyBehavior()
             
+            # draw the player on top
             self.player.draw()
         elif self.currScreen == 'endLevel':
             self.drawEndLevelScreen(screen)
@@ -207,29 +214,18 @@ class GameData:
 
     def spawnEnemiesBasedOnInensity(self):
         inten = self.intensityData[self.currIntensityInterval]
-        if inten < 0.25:
+        if inten < -1:
             self.enemySpawnFrequency = 1000
-        elif inten < 0.5:
+        elif inten < -0.5:
             self.enemySpawnFrequency = 700
-        elif inten < 0.75:
+        elif inten < 0.5:
             self.enemySpawnFrequency = 300
         else:
-            self.enemySpawnFrequency = 2000
+            self.enemySpawnFrequency = 100
     
-    # add an enemy in the game based off of the intensity
+    # add the current enemy the game 
     def addEnemy(self):
-        currIntensity = self.intensityData[self.currIntensityInterval]
-        enemy = 0
-        if 0.7 < currIntensity < 1: # high intensity
-            enemy = BoxEnemy(self.metaData)
-        elif 0.5 < currIntensity < 0.7: # medium intensity
-            enemy = NoodleEnemy(self.metaData)
-        elif currIntensity < 0.5: # low intensity
-            enemy = NoodleEnemy(self.metaData)
-        else:
-            enemy = NoodleEnemy(self.metaData)
-        
-        self.enemies.add(enemy)
+        self.enemies.add(self.currEnemy(self.metaData))
 
     # when not on beat, move enemies normally. Also handle wall collisions
     def moveEnemies(self):
@@ -247,11 +243,24 @@ class GameData:
                 #self.enemiesToRemove.add(enemy)
         self.ENEMY_DRAW_LOCK = False
 
+    # chooses a new enemy based off of the currently intensity
+    def chooseNewEnemy(self):
+        currIntensity = self.intensityData[self.currIntensityInterval]
+        if 1 < currIntensity: # high Intensity
+            self.currEnemy = random.choice([ShootySpinnyEnemy, PlusSignShootyEnemy])
+        elif 0.5 < currIntensity < 1: # medium intensity
+            self.currEnemy = random.choice([ShootySpinnyEnemy, BoxEnemy, NoodleEnemy])
+        elif -0.5 < currIntensity < 0.5: # low intensity
+            self.currEnemy = random.choice([BoxEnemy, NoodleEnemy])
+        else: # very low intensity
+            self.currEnemy = NoodleEnemyTunnel
+
     def intensityIntervalFired(self):
         if self.currIntensityInterval < len(self.intensityColors) - 2:
             self.currIntensityInterval += 1 # go to the next intensity interval
         self.currMainColor = self.intensityColors[self.currIntensityInterval]
         self.colorLerp = 0
+        self.chooseNewEnemy()
         print(self.intensityData[self.currIntensityInterval])
 
     # remove all of the dead enemies
@@ -338,7 +347,7 @@ class GameData:
             if not self.ENEMY_DRAW_LOCK: 
                 self.removeDeadEnemies()
                 self.addBullets()
-                if self.gameTime % self.enemySpawnFrequency == 0: # add enemies
+                if self.gameTime % (int(self.enemySpawnFrequency * (1/self.currEnemy(self.metaData).spawnRate))) == 0: # add enemies
                     self.addEnemy() # handle shooting enemy behavior
             # only run if we arent drawing coins
             if not self.COIN_DRAW_LOCK:

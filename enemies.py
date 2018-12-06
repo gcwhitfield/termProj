@@ -15,6 +15,7 @@ class EnemySpawnData:
         self.ShootySpinnyEnemyRate = 0.25
         self.PlusSignShootyEnemyRate = 0.2
         self.NoodleEnemyRate = 1
+        self.NoodleTunnelRate = 0.1
 # basic enemy class
 class Enemy:
     def __init__(self, metaData, size = None, speed = None):
@@ -47,12 +48,14 @@ class Enemy:
 class BoxEnemy(Enemy):
     def __init__(self, metaData, size=None, speed=None):
         super().__init__(metaData, size=size, speed=speed)
+        self.spawnRate = 4
         self.rect = pygame.Rect(self.posx, self.posy, self.size, self.size)
         self.colorOffset = (0, 10, 0)
         self.color = colors.Colors().addTwoColors(self.metaData.gameData.instantColor, self.colorOffset)
         self.minSize = self.size
         self.maxSize = self.minSize * 1.5
         self.growFactor = 1
+        
 
     # draw box
     def draw(self):
@@ -95,6 +98,7 @@ class BoxEnemy(Enemy):
 class NoodleEnemy(BoxEnemy):
     def __init__(self, metaData, size=None, speed=None):
         super().__init__(metaData, size=size, speed=speed)
+        self.spawnRate = 4
         self.size = self.size//2 # make the noodle skinnier
         self.length = self.size * 4 # length of the noodle
         self.rect = pygame.Rect(self.posx, self.posy, self.size, self.length)
@@ -132,12 +136,6 @@ class NoodleEnemy(BoxEnemy):
     def isCollidingWithPlayer(self):
         player = self.metaData.gameData.player
         return self.rect.colliderect(player.rect)
-        '''
-        return player.posx < self.posx + self.size//2 and \
-        player.posx + player.size > self.posx - self.size//2 and \
-        player.posy > self.posy + self.length//2 and \
-        player.posy + player.size < self.posy + self.length//2
-        '''
 
 class NoodleEnemyTunnel(Enemy):
     def initializeNoodleTunnel(self, yOffset):
@@ -147,38 +145,49 @@ class NoodleEnemyTunnel(Enemy):
             enemPosX = self.posx + ((self.noodleWidth + self.noodleBorder) * i) 
             # calculate the y position of the noodle 
             enemPosY = (math.sin(math.radians((360 / self.noodlesPerWavePeriod) * i)) * self.waveAmplitude) \
-            + yOffset
+            + yOffset + self.posy
             
             enemy = NoodleEnemy(self.metaData, size=self.noodleWidth) # make a new noodle
             enemy.posx = enemPosX
             enemy.posy = enemPosY
+            enemy.speed = self.speed
             result.append(enemy)
         return result
 
     def __init__(self, metaData, size=None, speed=None):
         super().__init__(metaData, size=size, speed=speed)
+        self.speed = 2
+        self.spawnRate = .05
         self.tunnelWidth = 300 # width of the tunnel
+        self.posy = random.randint(0, self.metaData.height - self.tunnelWidth)
         self.numNoodles = 100
         self.noodleWidth = 20
         self.noodleBorder = 5
         self.noodlesPerWavePeriod = 100
-        self.waveAmplitude = 30
+        self.waveAmplitude = random.randint(100, 300)
+        self.totalLength = self.numNoodles * (self.noodleWidth + self.noodleBorder)
 
         self.upperNoodles = self.initializeNoodleTunnel(0) # y offset is 0
         self.lowerNoodles = self.initializeNoodleTunnel(self.tunnelWidth) # y offset is tunnelWidth
 
         self.waveAlong = 0 # number to offset wave amount by every time we move noodles
-        self.waveSpeed = 1
+        self.waveSpeed = random.randint(5, 20)
 
     def noodleCrawl(self, noodls, lowerNoodles = False):
         for i in range(len(noodls)):
             noodls[i].posy = (math.sin(math.radians((360 / self.noodlesPerWavePeriod) * i) + self.waveAlong)  \
-            * self.waveAmplitude) + (self.tunnelWidth * lowerNoodles)
+            * self.waveAmplitude) + (self.tunnelWidth * lowerNoodles) + self.posy
     
     # moves the noodles in a wave motiion
     def waveTheNoodles(self):
         self.noodleCrawl(self.upperNoodles)
-        self.noodleCraw(self.lowerNoodles, lowerNoodles = True)
+        self.noodleCrawl(self.lowerNoodles, lowerNoodles = True)
+
+    def moveNoodles(self):
+        for noodl in self.upperNoodles:
+            noodl.posx -= self.speed
+        for noodl in self.lowerNoodles:
+            noodl.posx -= self.speed
 
     # shrinks all of the noodles
     def shrinkNoodles(self):
@@ -198,12 +207,14 @@ class NoodleEnemyTunnel(Enemy):
     def move(self): # move the tunnel
         self.posx -= self.speed
         self.waveTheNoodles()
+        self.moveNoodles()
         self.shrinkNoodles()
 
     # move when on the beat
     def beatMove(self):
         self.posx -= self.speed
-        self.waveTHeNoodles()
+        self.waveTheNoodles()
+        self.moveNoodles()
         self.growNoodles()
 
     def draw(self):
@@ -220,15 +231,22 @@ class NoodleEnemyTunnel(Enemy):
             if noodl.isCollidingWithPlayer():
                 return True
         return False
+
+    def wallCollide(self):
+        if self.posx + self.totalLength * 1.1 < 0:
+            self.metaData.gameData.enemiesToRemove.add(self)
+
 # enemy that spins in a circle and shoots bullets
 class ShootySpinnyEnemy(Enemy):
     def __init__(self, metaData, size=None, speed=None):
         super().__init__(metaData, size=size, speed=speed)
+        self.spawnRate = 0.25
         self.size = 30 
-        self.rotationSpeed = 1
+        self.rotationSpeed = self.speed
         self.currRotation = 0 # in degreed
         self.gunBarrelWidth = 20
-        self.color = (200, 100, 50)
+        self.colorOffset = (0, 0, 50)
+        self.color = colors.Colors().addTwoColors(self.colorOffset, self.metaData.gameData.instantColor)
         self.gunDistanceFromCenter = self.size // 2
         self.gunSize = self.size // 4
 
@@ -245,6 +263,8 @@ class ShootySpinnyEnemy(Enemy):
 
     def draw(self):
         self.calculateCenterCoordinates()
+        # update the color
+        self.color = colors.Colors().addTwoColors(self.colorOffset, self.metaData.gameData.instantColor)
         # the shooty spinny enemy is made up of two pieces - the circle, and the rectangle
         gun = self.getGunData()
         pygame.draw.circle(self.metaData.screen, self.color, gun, self.gunDistanceFromCenter//2)
@@ -288,6 +308,7 @@ class ShootySpinnyEnemy(Enemy):
 class PlusSignShootyEnemy(ShootySpinnyEnemy):
     def __init__(self, metaData, size=None, speed=None):
         super().__init__(metaData, size=size, speed=speed)
+        self.spawnRate = 0.2
         self.tgunAngle = self.currRotation
         self.rgunAngle = self.currRotation + 270
         self.lgunAngle = self.currRotation + 90
@@ -355,6 +376,8 @@ class PlusSignShootyEnemy(ShootySpinnyEnemy):
 
     def draw(self):
         self.calculateCenterCoordinates()
+        # update the color
+        self.color = colors.Colors().addTwoColors(self.colorOffset, self.metaData.gameData.instantColor)
         # the shooty spinny enemy is made up of two pieces - the circle, and the rectangle
         tgunx, tguny, lgunx, lguny, rgunx, rguny, bgunx, bguny = self.calculateLeftRightBottomGunsData(self.getGunData())
         
@@ -378,11 +401,13 @@ class Bullet(Enemy):
         super().__init__(metaData)
         self.posx = posx
         self.posy = posy
-        self.speed = 3
+        self.speed = 4
         self.rotation = rotation
         self.size = size
-        self.color = (0, 200, 200)
+        self.colorOffset = (0, 100, 0)
+        self.color = colors.Colors().addTwoColors(self.colorOffset, self.metaData.gameData.instantColor)
         self.isDead = False
+
 
     # a collision for the bullet object is hitting any wall
     def wallCollide(self):
@@ -403,12 +428,17 @@ class Bullet(Enemy):
 
     def draw(self):
         if not self.isDead:
+            # update the current color
+            self.color = colors.Colors().addTwoColors(self.colorOffset, self.metaData.gameData.instantColor)
             pygame.draw.circle(self.metaData.screen,
             self.color,
             (int(self.posx), int(self.posy)),
             int(self.size)
             )
-
+    
+    def isCollidingWithPlayer(self):
+        rect = pygame.Rect(self.posx, self.posy, int(self.size * 0.8), int(self.size * 0.8))
+        return rect.colliderect(self.metaData.gameData.player.rect)
 # a coin isnt an enemy but it's easier to store this class in this file
 class Coin:
     def __init__(self, metaData):

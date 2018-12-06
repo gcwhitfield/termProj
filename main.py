@@ -43,9 +43,12 @@ class MetaData:
         self.mainMenu = mainMenu.MainMenu(self, self.screen)
 
         self.emptyGameData = game.GameData
+        # we need to define the gameData only when we have an acceptable file path
         if os.path.isfile(self.song):
             self.gameData = game.GameData(self, self.screen, self.song)
             self.audioThread = self.gameData.musicThread
+        else:
+            self.gameData = None
 
 # define game variables
 metaData = MetaData()
@@ -70,7 +73,8 @@ while 1: # run the pygame window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             metaData.CLOSE_GAME = True
-            metaData.gameData.musicThread.join()
+            if metaData.gameData != None:
+                metaData.gameData.musicThread.join()
             sys.exit()
     metaData.screen.fill((0, 0, 0))
 

@@ -163,7 +163,8 @@ class SongSelectButton(MainMenuButton):
 
         text = txtData.render(self.text, True, self.txtColor, self.backGroundColor)
         rect = text.get_rect()
-        rect.centerx = self.posx + 300
+        textOffset = 10*len(self.text)
+        rect.centerx = self.posx + 300 + textOffset
         rect.centery = self.posy
         screen.blit(text, rect)
 
@@ -183,3 +184,43 @@ class SongSelectButton(MainMenuButton):
     def onClick(self):
         print(self.songFilePath)
         self.metaData.song = 'Music/' + self.songFilePath
+
+class SongPageScrollButton(Button):
+    def __init__(self, posx, posy, width, height, metaData, direction=1, text=None, backGroundColor=(...), onClickEvent=None, border=0, txtColor=None):
+        super().__init__(posx, posy, width, height, text=text, backGroundColor=backGroundColor, onClickEvent=onClickEvent, border=border, txtColor=txtColor)
+        self.direction = direction
+        self.metaData = metaData
+        self.image = 'imageAssets/arrow.png'
+
+    def isClicked(self, mousePosition):
+        # mouse position is an (x, y) tuple
+        x, y = mousePosition
+        if self.posx - self.width//2 < x and self.posx + self.width//2 > x and \
+        self.posy - self.height//2 < y and self.posy + self.height//2 > y:
+            self.onClick()
+
+    def draw(self, screen):
+        pygame.font.init()
+        txtData = pygame.font.SysFont(None,
+                                self.height) # font size
+        # i learned the logic for displaying texts in pygame from this wordpress
+        # website
+        # https://sivasantosh.wordpress.com/2012/07/18/displaying-text-in-pygame/
+        if self.direction == 1:
+            msg = '+'
+        elif self.direction == -1:
+            msg = '-'
+        text = txtData.render(msg, True, self.txtColor, self.backGroundColor)
+        rect = text.get_rect()
+        rect.centerx = self.posx
+        rect.centery = self.posy
+        screen.blit(text, rect)
+    
+    def onClick(self): # when the button gets clicked, execute the code
+        print('clicked!')
+        if self.metaData.mainMenu.songSelectButtons.currentScreen + self.direction > -1 and \
+        self.metaData.mainMenu.songSelectButtons.currentScreen + self.direction < self.metaData.mainMenu.songSelectButtons.numberOfScreens:
+            self.metaData.mainMenu.songSelectButtons.currentScreen += self.direction
+        print(self.metaData.mainMenu.songSelectButtons.currentScreen)
+        print(self.metaData.mainMenu.songSelectButtons.numberOfScreens)
+        print(self.metaData.mainMenu.songSelectButtons.buttonsPerScreen)
