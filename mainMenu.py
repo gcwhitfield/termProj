@@ -135,7 +135,7 @@ class MainMenu:
         ]),
         # buttons on the play screen
         self.playButtons = set([
-            MainMenuButton(50, 50,
+            MainMenuButton(100, 50,
             100, 50,
             'BACK',
             self.backgroundColor,
@@ -263,11 +263,10 @@ You only need to process the song once.
         self.songSelectButtons.draw(screen)
 
     def drawPlayScreen(self, screen):
-        for tup in self.playButtons:
-            for button in tup:
-                button.draw(screen)
         self.drawFileSelect(screen)
-    
+        for tup in self.playButtons:
+                for button in tup:
+                    button.draw(screen)
     def draw(self, screen):
         self.drawBackGround(screen)
         if self.currScreen == 'mainMenu':
