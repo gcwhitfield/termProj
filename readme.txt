@@ -11,6 +11,7 @@ https://www.youtube.com/watch?v=6Y65BlN4CPU&list=UU8y8T-s6MUjp-I4ejrhISWA
 Overview
 BeatDown is a videogame that can analyze a music file and generate a level that the player needs to complete while listening to the music. The player is a green square that moves around with the computer’s mouse movement, and the enemies are colorful objects that fly across the screen with the music.
 
+To run the project, run ‘python3 main.py’ 
 
 HOW TO INSTALL THE PROJECT
 
