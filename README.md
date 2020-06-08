@@ -1,11 +1,12 @@
 # Term Project - BEATDOWN
+December 6, 2018
+
 Term project for 15-112 Fundamentals of Programming at Carnegie Mellon University in the fall of 2018.
 
 George Whitfield
 
 gwhitfie@andrew.cmu.edu
 
-December 6, 2018
 
 https://www.youtube.com/watch?v=6Y65BlN4CPU&list=UU8y8T-s6MUjp-I4ejrhISWA
 
