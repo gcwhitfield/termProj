@@ -1,4 +1,4 @@
-#Term Project - BEATDOWN
+# Term Project - BEATDOWN
 Term project for 15-112 Fundamentals of Programming at Carnegie Mellon University in the fall of 2018.
 
 George Whitfield
