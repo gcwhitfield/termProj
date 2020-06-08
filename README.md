@@ -28,11 +28,13 @@ Both of these libraries can be installed using pip. If you run ‘pip install py
 
 Sometimes, you’ll try to install pyaudio and you get this error (on mac)
 
-  src/_portaudiomodule.c:29:10: fatal error: 'portaudio.h' file not found
+
+    src/_portaudiomodule.c:29:10: fatal error: 'portaudio.h' file not found
     #include "portaudio.h"
-             ^~~~~~~~~~~~~
+    
     1 error generated.
     error: command 'gcc' failed with exit status 1
+    
 If that happens, you need to install homebrew from https://brew.sh/  and then run 'brew install portaudio'.
 
 ## Notes
